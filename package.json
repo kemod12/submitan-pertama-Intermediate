@@ -1,11 +1,14 @@
 {
-  "name": "app-starter-project-with-webpack",
+  "name": "submitan-pertama-Intermediate",
   "version": "1.0.0",
-  "description": "",
+  "description": "Aplikasi Story Map dengan PWA dan Fitur Offline",
+  "homepage": "https://kemod12.github.io/submitan-pertama-Intermediate",
   "scripts": {
     "build": "webpack --config webpack.prod.js",
     "start-dev": "webpack serve --config webpack.dev.js",
-    "serve": "http-server dist"
+    "serve": "http-server dist",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "keywords": [],
   "author": "YOUR_NAME <yourmail@mail.com>",
@@ -16,6 +19,7 @@
     "clean-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^13.0.0",
     "css-loader": "^6.8.1",
+    "gh-pages": "^6.3.0",
     "html-webpack-plugin": "^5.6.3",
     "http-server": "^14.1.1",
     "mini-css-extract-plugin": "^2.9.2",
