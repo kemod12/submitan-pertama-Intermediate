@@ -1,0 +1,71 @@
+<!doctype html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="description" content="A story sharing platform where users can share their stories with locations on a map"><meta name="theme-color" content="#4f46e5"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Story Map"><link rel="manifest" href="/manifest.webmanifest"><link rel="shortcut icon" href="favicon.png"><link rel="apple-touch-icon" href="/images/icon-192x192.png"><title>Story Map - Share Your Stories</title><script defer="defer" src="app.bundle.js"></script><link href="app.css" rel="stylesheet"></head><body><a href="#main-content" class="skip-link">Skip to main content</a><header><div class="main-header container"><a class="brand-name" href="#/" aria-label="Story Map Home">Story Map</a><nav id="navigation-drawer" class="navigation-drawer" aria-label="Main navigation"><ul id="nav-list" class="nav-list" role="menubar"><li role="none"><a href="#/" role="menuitem">Home</a></li><li role="none"><a href="#/about" role="menuitem">About</a></li><li role="none"><a href="#/add" role="menuitem">Add Story</a></li></ul></nav><button id="drawer-button" class="drawer-button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navigation-drawer"><span class="sr-only">Menu</span> ☰</button></div></header><main id="main-content" class="main-content" tabindex="-1"></main><footer class="footer"><div class="container"><p>&copy; 2025 Story Map. All rights reserved.</p><div class="notification-controls" style="margin-top: 1rem;"><button id="notification-toggle" class="btn btn-secondary"><span class="notification-status">Enable Notifications</span></button></div></div></footer><script>// Register service worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+              console.log('ServiceWorker registration successful');
+              // Initialize notification toggle
+              const notificationToggle = document.getElementById('notification-toggle');
+              if (notificationToggle) {
+                notificationToggle.addEventListener('click', async () => {
+                  try {
+                    const notificationHelper = (await import('./scripts/utils/notification.js')).default;
+                    const isSubscribed = await notificationHelper.getSubscription();
+                    
+                    if (isSubscribed) {
+                      await notificationHelper.unsubscribeUser();
+                      notificationToggle.textContent = 'Enable Notifications';
+                      console.log('Unsubscribed from push notifications');
+                    } else {
+                      // You'll need to get the VAPID public key from your server
+                      const publicVapidKey = 'YOUR_VAPID_PUBLIC_KEY';
+                      const subscription = await notificationHelper.subscribeUser(publicVapidKey);
+                      // Send subscription to your server
+                      // You'll need to implement this part based on your backend
+                      console.log('Subscribed to push notifications', subscription);
+                      notificationToggle.textContent = 'Disable Notifications';
+                    }
+                  } catch (error) {
+                    console.error('Error toggling notifications:', error);
+                    alert('Failed to update notification settings. Please check console for details.');
+                  }
+                });
+
+                // Update button text based on current subscription
+                (async () => {
+                  try {
+                    const notificationHelper = (await import('./scripts/utils/notification.js')).default;
+                    const isSubscribed = await notificationHelper.getSubscription();
+                    const toggleBtn = document.getElementById('notification-toggle');
+                    if (toggleBtn) {
+                      toggleBtn.textContent = isSubscribed ? 'Disable Notifications' : 'Enable Notifications';
+                    }
+                  } catch (error) {
+                    console.error('Error checking notification status:', error);
+                  }
+                })();
+              }
+            })
+            .catch(error => {
+              console.error('ServiceWorker registration failed: ', error);
+            });
+        });
+      }
+
+      // Listen for online/offline status
+      function updateOnlineStatus() {
+        const statusElement = document.getElementById('online-status');
+        if (statusElement) {
+          if (navigator.onLine) {
+            statusElement.textContent = 'Online';
+            statusElement.className = 'online';
+          } else {
+            statusElement.textContent = 'Offline - Working in offline mode';
+            statusElement.className = 'offline';
+          }
+        }
+      }
+
+      window.addEventListener('online', updateOnlineStatus);
+      window.addEventListener('offline', updateOnlineStatus);
+      document.addEventListener('DOMContentLoaded', updateOnlineStatus);</script></body></html>

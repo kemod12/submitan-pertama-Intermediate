@@ -1,0 +1,55 @@
+{
+  "name": "Story Map",
+  "short_name": "StoryMap",
+  "description": "A story sharing platform with location mapping",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/images/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Story Map Home Screen"
+    },
+    {
+      "src": "/images/screenshot2.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Add New Story"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add New Story",
+      "short_name": "New Story",
+      "description": "Add a new story with location",
+      "url": "/add",
+      "icons": [{ "src": "/images/icon-add.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "View Stories",
+      "short_name": "Stories",
+      "description": "View all stories",
+      "url": "/"
+    }
+  ]
+}
