@@ -42,17 +42,28 @@ class IndexedDBHelper {
   async addStory(story) {
     const db = await this.openDatabase();
     
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const transaction = db.transaction(['stories'], 'readwrite');
       const store = transaction.objectStore('stories');
       
-      const request = store.add({
+      // Cek dulu apakah story dengan ID yang sama sudah ada
+      const existingStory = await new Promise((resolve) => {
+        const req = store.get(story.id);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => resolve(null);
+      });
+
+      const storyToSave = {
         ...story,
         id: story.id || `local-${Date.now()}`,
         isLocal: !story.id,
         createdAt: story.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString()
-      });
+      };
+
+      const request = existingStory 
+        ? store.put(storyToSave)  // Update jika sudah ada
+        : store.add(storyToSave); // Tambah baru jika belum ada
 
       request.onsuccess = () => resolve(request.result);
       request.onerror = (event) => {
