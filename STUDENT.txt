@@ -1,2 +1,2 @@
-APP_URL=<url_aplikasi>
-MAP_SERVICE_API_KEY=<api_key>
+APP_URL=https://kemod12.github.io/submitan-pertama-Intermediate/
+MAP_SERVICE_API_KEY=YOUR_LEAFLET_MAP_API_KEY
