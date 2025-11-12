@@ -42,33 +42,38 @@ class IndexedDBHelper {
   async addStory(story) {
     const db = await this.openDatabase();
     
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const transaction = db.transaction(['stories'], 'readwrite');
       const store = transaction.objectStore('stories');
       
-      // Cek dulu apakah story dengan ID yang sama sudah ada
-      const existingStory = await new Promise((resolve) => {
-        const req = store.get(story.id);
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => resolve(null);
-      });
-
+      // Generate ID yang unik dengan timestamp dan random string
       const storyToSave = {
         ...story,
-        id: story.id || `local-${Date.now()}`,
+        id: story.id || `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         isLocal: !story.id,
         createdAt: story.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
 
-      const request = existingStory 
-        ? store.put(storyToSave)  // Update jika sudah ada
-        : store.add(storyToSave); // Tambah baru jika belum ada
+      // Selalu gunakan put() untuk menimpa data yang sudah ada
+      const request = store.put(storyToSave);
 
-      request.onsuccess = () => resolve(request.result);
+      request.onsuccess = () => {
+        console.log('Story saved successfully:', storyToSave.id);
+        resolve({ ...storyToSave, id: request.result || storyToSave.id });
+      };
+      
       request.onerror = (event) => {
-        console.error('Error adding story:', event.target.error);
-        reject(event.target.error);
+        console.error('Error saving story:', event.target.error);
+        
+        // Jika error karena duplikasi, coba lagi dengan ID baru
+        if (event.target.error.name === 'ConstraintError') {
+          console.warn('Duplicate ID detected, retrying with new ID...');
+          story.id = `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          this.addStory(story).then(resolve).catch(reject);
+        } else {
+          reject(event.target.error);
+        }
       };
     });
   }

@@ -108,10 +108,13 @@ class StoryService {
     // If offline, save to IndexedDB and queue for sync
     if (!navigator.onLine) {
       try {
+        // Generate a unique ID for the local story
+        const localId = `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        
         // Save to IndexedDB
         const localStory = await dbHelper.addStory({
           ...storyForDb,
-          id: `local-${Date.now()}`
+          id: localId
         });
 
         // Add to sync queue
@@ -121,13 +124,18 @@ class StoryService {
           method: 'POST',
           url: `${BASE_URL}/stories`,
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          },
+          meta: {
+            localId: localId
           }
         });
 
         return { 
           ...localStory,
-          message: 'Story saved locally. Will be synced when online.' 
+          message: 'Story saved locally. Will be synced when online.',
+          isLocal: true
         };
       } catch (error) {
         console.error('Error saving story offline:', error);
