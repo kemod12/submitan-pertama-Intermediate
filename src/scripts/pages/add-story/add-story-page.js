@@ -96,12 +96,72 @@ export default class AddStoryPage {
     const photoInput = document.getElementById('photo');
     const previewContainer = document.getElementById('photo-preview');
     const cancelButton = document.getElementById('cancel-button');
+    const submitButton = form.querySelector('button[type="submit"]');
+    let isSubmitting = false;
+
+    // Handle form submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (isSubmitting) return;
+      isSubmitting = true;
+      submitButton.disabled = true;
+      submitButton.textContent = 'Sharing...';
+
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          window.location.hash = '#/login';
+          return;
+        }
+
+        const formData = new FormData(form);
+        const description = formData.get('description').trim();
+        const photoFile = formData.get('photo');
+
+        if (!description) {
+          throw new Error('Please enter a description');
+        }
+
+        if (!photoFile || photoFile.size === 0) {
+          throw new Error('Please select a photo');
+        }
+
+        if (!this.#selectedLocation) {
+          throw new Error('Please select a location on the map');
+        }
+
+        const storyData = {
+          description,
+          photo: photoFile,
+          lat: this.#selectedLocation.lat,
+          lon: this.#selectedLocation.lng
+        };
+
+        const response = await StoryService.addStory(token, storyData);
+        
+        // Show success message
+        alert('Story shared successfully!');
+        
+        // Redirect to home or story detail
+        window.location.hash = '/';
+        
+      } catch (error) {
+        console.error('Error adding story:', error);
+        alert(`Failed to share story: ${error.message}`);
+      } finally {
+        isSubmitting = false;
+        submitButton.disabled = false;
+        submitButton.textContent = 'Share Story';
+      }
+    });
 
     // Handle cancel button
     cancelButton.addEventListener('click', () => {
-      window.location.hash = '#/';
+      window.location.hash = '/';
     });
 
+    // Handle photo preview
     photoInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) {
@@ -112,39 +172,6 @@ export default class AddStoryPage {
           `;
         };
         reader.readAsDataURL(file);
-      }
-    });
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      try {
-        const formData = new FormData(form);
-        const description = formData.get('description');
-        const photo = formData.get('photo');
-
-        if (!this.#selectedLocation) {
-          alert('Please select a location on the map');
-          return;
-        }
-
-        const token = localStorage.getItem('token');
-        if (!token) {
-          window.location.hash = '#/login';
-          return;
-        }
-
-        await StoryService.addStory(token, {
-          description,
-          photo,
-          lat: this.#selectedLocation.lat,
-          lon: this.#selectedLocation.lng
-        });
-
-        window.location.hash = '#/';
-      } catch (error) {
-        console.error('Error adding story:', error);
-        alert('Failed to add story. Please try again.');
       }
     });
   }
