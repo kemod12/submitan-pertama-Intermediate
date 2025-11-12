@@ -1,0 +1,49 @@
+.page-transition {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.page-transition.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-enter {
+  animation: fadeInUp 0.3s ease-out forwards;
+}
+
+.page-exit {
+  animation: fadeOutDown 0.3s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+/* View Transition API support */
+::view-transition-old(root) {
+  animation: fadeOutDown 0.3s ease-out forwards;
+}
+
+::view-transition-new(root) {
+  animation: fadeInUp 0.3s ease-out forwards;
+}
