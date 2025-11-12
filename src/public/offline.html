@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You're Offline - Story Map</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+    .offline-container {
+      max-width: 500px;
+      padding: 2rem;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #4f46e5;
+      margin-bottom: 1rem;
+    }
+    p {
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+    .offline-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      color: #6b7280;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background-color: #4f46e5;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+    .btn:hover {
+      background-color: #4338ca;
+    }
+    .btn-secondary {
+      background-color: #e5e7eb;
+      color: #1f2937;
+      margin-left: 0.75rem;
+    }
+    .btn-secondary:hover {
+      background-color: #d1d5db;
+    }
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <div class="offline-icon">📶</div>
+    <h1>You're Offline</h1>
+    <p>It seems you're not connected to the internet. Don't worry, you can still view previously loaded content and add new stories that will sync when you're back online.</p>
+    <div class="button-group">
+      <a href="/" class="btn">Go to Home</a>
+      <button onclick="window.location.reload()" class="btn btn-secondary">Try Again</button>
+    </div>
+  </div>
+
+  <script>
+    // Check for network status
+    function updateOnlineStatus() {
+      if (navigator.onLine) {
+        window.location.href = '/';
+      }
+    }
+
+    // Listen for online status changes
+    window.addEventListener('online', updateOnlineStatus);
+    
+    // Check if we're back online when the page loads
+    document.addEventListener('DOMContentLoaded', updateOnlineStatus);
+  </script>
+</body>
+</html>
