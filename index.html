@@ -1,8 +1,30 @@
-<!doctype html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="description" content="A story sharing platform where users can share their stories with locations on a map"><meta name="theme-color" content="#4f46e5"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Story Map"><link rel="manifest" href="/submitan-pertama-Intermediate/manifest.webmanifest"><link rel="shortcut icon" href="favicon.png"><link rel="apple-touch-icon" href="/submitan-pertama-Intermediate/images/logo.png"><title>Story Map - Share Your Stories</title><script defer="defer" src="/submitan-pertama-Intermediate/app.bundle.js"></script><link href="/submitan-pertama-Intermediate/app.css" rel="stylesheet"></head><body><a href="#main-content" class="skip-link">Skip to main content</a><header><div class="main-header container"><a class="brand-name" href="#/" aria-label="Story Map Home">Story Map</a><nav id="navigation-drawer" class="navigation-drawer" aria-label="Main navigation"><ul id="nav-list" class="nav-list" role="menubar"><li role="none"><a href="#/" role="menuitem">Home</a></li><li role="none"><a href="#/about" role="menuitem">About</a></li><li role="none"><a href="#/add" role="menuitem">Add Story</a></li></ul></nav><button id="drawer-button" class="drawer-button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navigation-drawer"><span class="sr-only">Menu</span> ☰</button></div></header><main id="main-content" class="main-content" tabindex="-1"></main><footer class="footer"><div class="container"><p>&copy; 2025 Story Map. All rights reserved.</p><div class="notification-controls" style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;"><button id="install-button" class="btn btn-secondary" style="display: none;">Install App</button> <button id="notification-toggle" class="btn btn-secondary"><span class="notification-status">Enable Notifications</span></button></div></div></footer><script>// Register service worker
+<!doctype html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="description" content="A story sharing platform where users can share their stories with locations on a map"><meta name="theme-color" content="#4f46e5"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Story Map"><link rel="manifest" href="/manifest.webmanifest" id="manifest-link"><link rel="shortcut icon" href="favicon.png"><link rel="apple-touch-icon" href="/images/logo.png" id="apple-touch-icon"><title>Story Map - Share Your Stories</title><script defer="defer" src="/submitan-pertama-Intermediate/app.bundle.js"></script><link href="/submitan-pertama-Intermediate/app.css" rel="stylesheet"></head><body><a href="#main-content" class="skip-link">Skip to main content</a><header><div class="main-header container"><a class="brand-name" href="#/" aria-label="Story Map Home">Story Map</a><nav id="navigation-drawer" class="navigation-drawer" aria-label="Main navigation"><ul id="nav-list" class="nav-list" role="menubar"><li role="none"><a href="#/" role="menuitem">Home</a></li><li role="none"><a href="#/about" role="menuitem">About</a></li><li role="none"><a href="#/add" role="menuitem">Add Story</a></li></ul></nav><button id="drawer-button" class="drawer-button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navigation-drawer"><span class="sr-only">Menu</span> ☰</button></div></header><main id="main-content" class="main-content" tabindex="-1"></main><footer class="footer"><div class="container"><p>&copy; 2025 Story Map. All rights reserved.</p><div class="notification-controls" style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;"><button id="install-button" class="btn btn-secondary" style="display: none;">Install App</button> <button id="notification-toggle" class="btn btn-secondary"><span class="notification-status">Enable Notifications</span></button></div></div></footer><script>// Detect environment (development vs production)
+      const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+      const BASE_PATH = isProduction ? '/submitan-pertama-Intermediate' : '';
+      
+      // Helper function to create path
+      const createPath = (path) => {
+        const fullPath = BASE_PATH ? `${BASE_PATH}${path}` : path;
+        return fullPath.replace(/\/+/g, '/'); // Replace multiple slashes with single slash
+      };
+      
+      // Update manifest and icon paths
+      const manifestLink = document.getElementById('manifest-link');
+      if (manifestLink) {
+        manifestLink.href = createPath('/manifest.webmanifest');
+      }
+      
+      const appleIcon = document.getElementById('apple-touch-icon');
+      if (appleIcon) {
+        appleIcon.href = createPath('/images/logo.png');
+      }
+
+      // Register service worker
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
           try {
-            const registration = await navigator.serviceWorker.register('/submitan-pertama-Intermediate/sw.js');
+            const swPath = createPath('/sw.js');
+            const registration = await navigator.serviceWorker.register(swPath);
             console.log('ServiceWorker registration successful:', registration.scope);
             
             // Initialize notification toggle
@@ -31,7 +53,10 @@
                   if (subscription) {
                     // Unsubscribe
                     await NotificationHelper.unsubscribeUser();
-                    notificationToggle.querySelector('.notification-status').textContent = 'Enable Notifications';
+                    const statusSpan = notificationToggle.querySelector('.notification-status');
+                    if (statusSpan) {
+                      statusSpan.textContent = 'Enable Notifications';
+                    }
                     console.log('Unsubscribed from push notifications');
                   } else {
                     // Subscribe
@@ -42,7 +67,10 @@
                     if (token) {
                       const success = await NotificationHelper.sendSubscriptionToServer(newSubscription, token);
                       if (success) {
-                        notificationToggle.querySelector('.notification-status').textContent = 'Disable Notifications';
+                        const statusSpan = notificationToggle.querySelector('.notification-status');
+                        if (statusSpan) {
+                          statusSpan.textContent = 'Disable Notifications';
+                        }
                         console.log('Subscribed to push notifications');
                       } else {
                         alert('Failed to register subscription with server. Please try again.');
@@ -50,7 +78,10 @@
                     } else {
                       // Store subscription locally if not logged in
                       localStorage.setItem('pushSubscription', JSON.stringify(newSubscription));
-                      notificationToggle.querySelector('.notification-status').textContent = 'Disable Notifications';
+                      const statusSpan = notificationToggle.querySelector('.notification-status');
+                      if (statusSpan) {
+                        statusSpan.textContent = 'Disable Notifications';
+                      }
                       console.log('Subscribed to push notifications (will sync when logged in)');
                     }
                   }
@@ -80,6 +111,8 @@
 
             // Handle PWA install prompt
             let deferredPrompt;
+            let installButtonClickHandler = null;
+            
             window.addEventListener('beforeinstallprompt', (e) => {
               e.preventDefault();
               deferredPrompt = e;
@@ -87,8 +120,15 @@
               // Show install button if available
               const installButton = document.getElementById('install-button');
               if (installButton) {
-                installButton.style.display = 'block';
-                installButton.addEventListener('click', async () => {
+                installButton.style.display = 'inline-block';
+                
+                // Remove existing listener if any
+                if (installButtonClickHandler) {
+                  installButton.removeEventListener('click', installButtonClickHandler);
+                }
+                
+                // Add new click handler
+                installButtonClickHandler = async () => {
                   if (deferredPrompt) {
                     deferredPrompt.prompt();
                     const { outcome } = await deferredPrompt.userChoice;
@@ -96,7 +136,9 @@
                     deferredPrompt = null;
                     installButton.style.display = 'none';
                   }
-                });
+                };
+                
+                installButton.addEventListener('click', installButtonClickHandler);
               }
             });
 
