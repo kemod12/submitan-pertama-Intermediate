@@ -3,19 +3,20 @@
   "short_name": "StoryMap",
   "description": "A story sharing platform with location mapping",
   "start_url": "/submitan-pertama-Intermediate/",
+  "scope": "/submitan-pertama-Intermediate/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4f46e5",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/submitan-pertama-Intermediate/images/icon-192x192.png",
+      "src": "/submitan-pertama-Intermediate/images/logo.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/submitan-pertama-Intermediate/images/icon-512x512.png",
+      "src": "/submitan-pertama-Intermediate/images/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -23,18 +24,18 @@
   ],
   "screenshots": [
     {
-      "src": "/submitan-pertama-Intermediate/images/screenshot1.png",
-      "sizes": "1080x1920",
+      "src": "/submitan-pertama-Intermediate/images/logo.png",
+      "sizes": "1280x720",
       "type": "image/png",
-      "form_factor": "narrow",
+      "form_factor": "wide",
       "label": "Story Map Home Screen"
     },
     {
-      "src": "/submitan-pertama-Intermediate/images/screenshot2.png",
-      "sizes": "1080x1920",
+      "src": "/submitan-pertama-Intermediate/images/logo.png",
+      "sizes": "750x1334",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Add New Story"
+      "label": "Story Map Mobile View"
     }
   ],
   "shortcuts": [
@@ -42,14 +43,14 @@
       "name": "Add New Story",
       "short_name": "New Story",
       "description": "Add a new story with location",
-      "url": "/submitan-pertama-Intermediate/add",
-      "icons": [{ "src": "/submitan-pertama-Intermediate/images/icon-add.png", "sizes": "192x192" }]
+      "url": "/submitan-pertama-Intermediate/#/add",
+      "icons": [{ "src": "/submitan-pertama-Intermediate/images/logo.png", "sizes": "192x192" }]
     },
     {
       "name": "View Stories",
       "short_name": "Stories",
       "description": "View all stories",
-      "url": "/submitan-pertama-Intermediate/"
+      "url": "/submitan-pertama-Intermediate/#/"
     }
   ]
 }
