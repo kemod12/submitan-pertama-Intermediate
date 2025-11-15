@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="description" content="A story sharing platform where users can share their stories with locations on a map"><meta name="theme-color" content="#4f46e5"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Story Map"><link rel="manifest" href="/manifest.webmanifest" id="manifest-link"><link rel="shortcut icon" href="favicon.png"><link rel="apple-touch-icon" href="/images/logo.png" id="apple-touch-icon"><title>Story Map - Share Your Stories</title><script defer="defer" src="/submitan-pertama-Intermediate/app.bundle.js"></script><link href="/submitan-pertama-Intermediate/app.css" rel="stylesheet"></head><body><a href="#main-content" class="skip-link">Skip to main content</a><header><div class="main-header container"><a class="brand-name" href="#/" aria-label="Story Map Home">Story Map</a><nav id="navigation-drawer" class="navigation-drawer" aria-label="Main navigation"><ul id="nav-list" class="nav-list" role="menubar"><li role="none"><a href="#/" role="menuitem">Home</a></li><li role="none"><a href="#/about" role="menuitem">About</a></li><li role="none"><a href="#/add" role="menuitem">Add Story</a></li></ul></nav><button id="drawer-button" class="drawer-button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navigation-drawer"><span class="sr-only">Menu</span> ☰</button></div></header><main id="main-content" class="main-content" tabindex="-1"></main><footer class="footer"><div class="container"><p>&copy; 2025 Story Map. All rights reserved.</p><div class="notification-controls" style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;"><button id="install-button" class="btn btn-secondary" style="display: none;">Install App</button> <button id="notification-toggle" class="btn btn-secondary"><span class="notification-status">Enable Notifications</span></button></div></div></footer><script>// Detect environment (development vs production)
+<!doctype html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="description" content="A story sharing platform where users can share their stories with locations on a map"><meta name="theme-color" content="#4f46e5"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Story Map"><link rel="manifest" href="/manifest.webmanifest" id="manifest-link"><link rel="shortcut icon" href="favicon.png"><link rel="apple-touch-icon" href="/images/logo.png" id="apple-touch-icon"><title>Story Map - Share Your Stories</title><script defer="defer" src="/app.bundle.js"></script><link href="/app.css" rel="stylesheet"></head><body><a href="#main-content" class="skip-link">Skip to main content</a><header><div class="main-header container"><a class="brand-name" href="#/" aria-label="Story Map Home">Story Map</a><nav id="navigation-drawer" class="navigation-drawer" aria-label="Main navigation"><ul id="nav-list" class="nav-list" role="menubar"><li role="none"><a href="#/" role="menuitem">Home</a></li><li role="none"><a href="#/about" role="menuitem">About</a></li><li role="none"><a href="#/add" role="menuitem">Add Story</a></li></ul></nav><div class="header-actions"><button id="notification-toggle" class="header-btn notification-btn" aria-label="Toggle push notifications"><span class="btn-icon">🔔</span> <span class="btn-text notification-status">Notifications</span></button> <button id="drawer-button" class="drawer-button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navigation-drawer"><span class="sr-only">Menu</span> ☰</button></div></div><div id="header-notification-container" class="header-notification-container" role="region" aria-live="polite" aria-atomic="true"></div></header><main id="main-content" class="main-content" tabindex="-1"></main><footer class="footer"><div class="container"><p>&copy; 2025 Story Map. All rights reserved.</p><div class="notification-controls" style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;"><button id="install-button" class="btn btn-secondary install-btn" style="display: none;" aria-label="Install Story Map app">📱 Install App</button></div></div></footer><script>// Detect environment (development vs production)
       const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
       const BASE_PATH = isProduction ? '/submitan-pertama-Intermediate' : '';
       
@@ -8,7 +8,7 @@
         return fullPath.replace(/\/+/g, '/'); // Replace multiple slashes with single slash
       };
       
-      // Update manifest and icon paths
+      // Update manifest and icon paths dynamically
       const manifestLink = document.getElementById('manifest-link');
       if (manifestLink) {
         manifestLink.href = createPath('/manifest.webmanifest');
@@ -17,6 +17,11 @@
       const appleIcon = document.getElementById('apple-touch-icon');
       if (appleIcon) {
         appleIcon.href = createPath('/images/logo.png');
+      }
+      
+      // Ensure manifest is accessible
+      if (manifestLink) {
+        manifestLink.setAttribute('crossorigin', 'use-credentials');
       }
 
       // Register service worker
@@ -27,10 +32,35 @@
             const registration = await navigator.serviceWorker.register(swPath);
             console.log('ServiceWorker registration successful:', registration.scope);
             
+            // Initialize notifications after service worker is ready
+            try {
+              await registration.ready;
+              const { default: NotificationHelper } = await import('./scripts/utils/notification.js');
+              await NotificationHelper.initialize();
+            } catch (error) {
+              console.error('Error initializing notifications:', error);
+            }
+            
             // Initialize notification toggle
             const notificationToggle = document.getElementById('notification-toggle');
             if (notificationToggle) {
-              notificationToggle.addEventListener('click', async () => {
+              notificationToggle.addEventListener('click', async (e) => {
+                // Check if it's a long press or right click for test notification
+                if (e.shiftKey || e.ctrlKey) {
+                  e.preventDefault();
+                  try {
+                    const { default: NotificationHelper } = await import('./scripts/utils/notification.js');
+                    const result = await NotificationHelper.testNotification();
+                    if (!result) {
+                      alert('Notifikasi tidak dapat ditampilkan. Pastikan izin notifikasi sudah diberikan.');
+                    }
+                  } catch (error) {
+                    console.error('Error testing notification:', error);
+                    alert('Gagal menampilkan notifikasi test: ' + error.message);
+                  }
+                  return;
+                }
+
                 try {
                   const { default: NotificationHelper } = await import('./scripts/utils/notification.js');
                   const { default: CONFIG } = await import('./scripts/config.js');
@@ -52,15 +82,22 @@
                   
                   if (subscription) {
                     // Unsubscribe
-                    await NotificationHelper.unsubscribeUser();
+                    const token = localStorage.getItem('token');
+                    await NotificationHelper.unsubscribeUser(token);
                     const statusSpan = notificationToggle.querySelector('.notification-status');
                     if (statusSpan) {
                       statusSpan.textContent = 'Enable Notifications';
                     }
+                    notificationToggle.classList.remove('active');
                     console.log('Unsubscribed from push notifications');
                   } else {
                     // Subscribe
                     const newSubscription = await NotificationHelper.subscribeUser(CONFIG.VAPID_PUBLIC_KEY);
+                    
+                    if (!newSubscription) {
+                      alert('Failed to subscribe to push notifications. Please try again.');
+                      return;
+                    }
                     
                     // Send subscription to server
                     const token = localStorage.getItem('token');
@@ -71,9 +108,17 @@
                         if (statusSpan) {
                           statusSpan.textContent = 'Disable Notifications';
                         }
+                        notificationToggle.classList.add('active');
                         console.log('Subscribed to push notifications');
                       } else {
-                        alert('Failed to register subscription with server. Please try again.');
+                        // Still store locally even if server sync fails
+                        localStorage.setItem('pushSubscription', JSON.stringify(newSubscription));
+                        const statusSpan = notificationToggle.querySelector('.notification-status');
+                        if (statusSpan) {
+                          statusSpan.textContent = 'Disable Notifications';
+                        }
+                        notificationToggle.classList.add('active');
+                        alert('Subscribed locally, but failed to register with server. Will retry when online.');
                       }
                     } else {
                       // Store subscription locally if not logged in
@@ -82,6 +127,7 @@
                       if (statusSpan) {
                         statusSpan.textContent = 'Disable Notifications';
                       }
+                      notificationToggle.classList.add('active');
                       console.log('Subscribed to push notifications (will sync when logged in)');
                     }
                   }
@@ -95,6 +141,16 @@
               (async () => {
                 try {
                   const { default: NotificationHelper } = await import('./scripts/utils/notification.js');
+                  
+                  // Check if push is supported
+                  if (!(await NotificationHelper.isPushSupported())) {
+                    const toggleBtn = document.getElementById('notification-toggle');
+                    if (toggleBtn) {
+                      toggleBtn.style.display = 'none';
+                    }
+                    return;
+                  }
+
                   const subscription = await NotificationHelper.getSubscription();
                   const toggleBtn = document.getElementById('notification-toggle');
                   if (toggleBtn) {
@@ -102,26 +158,58 @@
                     if (statusSpan) {
                       statusSpan.textContent = subscription ? 'Disable Notifications' : 'Enable Notifications';
                     }
+                    // Add active class if subscribed
+                    if (subscription) {
+                      toggleBtn.classList.add('active');
+                    } else {
+                      toggleBtn.classList.remove('active');
+                    }
                   }
                 } catch (error) {
                   console.error('Error checking notification status:', error);
+                  // Hide button on error
+                  const toggleBtn = document.getElementById('notification-toggle');
+                  if (toggleBtn) {
+                    toggleBtn.style.display = 'none';
+                  }
                 }
               })();
             }
 
             // Handle PWA install prompt
-            let deferredPrompt;
+            let deferredPrompt = null;
             let installButtonClickHandler = null;
             
+            // Check if app is already installed
+            const isInstalled = window.matchMedia('(display-mode: standalone)').matches || 
+                               window.navigator.standalone || 
+                               document.referrer.includes('android-app://');
+            
+            // Show install button in footer if not installed
+            const showInstallButton = () => {
+              const installButton = document.getElementById('install-button');
+              if (installButton && !isInstalled) {
+                installButton.style.display = 'inline-block';
+                console.log('✅ Install button shown');
+              }
+            };
+            
+            // Log install prompt availability
+            console.log('🔍 Checking for install prompt support...');
+            console.log('Service Worker support:', 'serviceWorker' in navigator);
+            console.log('Manifest link:', document.querySelector('link[rel="manifest"]')?.href);
+            console.log('Is installed:', isInstalled);
+            
             window.addEventListener('beforeinstallprompt', (e) => {
+              console.log('🎉 beforeinstallprompt event fired!');
               e.preventDefault();
               deferredPrompt = e;
               
-              // Show install button if available
+              // Show install button
+              showInstallButton();
+              
               const installButton = document.getElementById('install-button');
               if (installButton) {
-                installButton.style.display = 'inline-block';
-                
                 // Remove existing listener if any
                 if (installButtonClickHandler) {
                   installButton.removeEventListener('click', installButtonClickHandler);
@@ -130,26 +218,111 @@
                 // Add new click handler
                 installButtonClickHandler = async () => {
                   if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    console.log(`User response to install prompt: ${outcome}`);
-                    deferredPrompt = null;
-                    installButton.style.display = 'none';
+                    try {
+                      console.log('📱 Showing install prompt...');
+                      deferredPrompt.prompt();
+                      const { outcome } = await deferredPrompt.userChoice;
+                      console.log(`User response to install prompt: ${outcome}`);
+                      
+                      if (outcome === 'accepted') {
+                        console.log('✅ User accepted installation');
+                        // Show success message
+                        try {
+                          const { default: HeaderNotification } = await import('./scripts/utils/header-notification.js');
+                          HeaderNotification.success(
+                            'Aplikasi Berhasil Diinstal',
+                            'Terima kasih! Aplikasi Story Map sedang diinstal.',
+                            3000
+                          );
+                        } catch (err) {
+                          alert('Terima kasih! Aplikasi Story Map sedang diinstal.');
+                        }
+                      } else {
+                        console.log('❌ User dismissed installation');
+                      }
+                      
+                      deferredPrompt = null;
+                      installButton.style.display = 'none';
+                    } catch (error) {
+                      console.error('❌ Error showing install prompt:', error);
+                      alert('Gagal menampilkan prompt instalasi: ' + error.message);
+                    }
+                  } else {
+                    console.warn('⚠️ deferredPrompt is null');
                   }
                 };
                 
                 installButton.addEventListener('click', installButtonClickHandler);
+                console.log('✅ Install button click handler attached');
+              } else {
+                console.error('❌ Install button not found in DOM');
               }
             });
+            
+            // Check if install prompt is available after a delay
+            setTimeout(() => {
+              if (!deferredPrompt && !isInstalled) {
+                console.log('⚠️ Install prompt not available. Checking requirements...');
+                console.log('Service Worker:', 'serviceWorker' in navigator);
+                console.log('Manifest:', document.querySelector('link[rel="manifest"]')?.href);
+                
+                // Try to show install button anyway for manual install
+                const installButton = document.getElementById('install-button');
+                if (installButton) {
+                  // Show button with manual install instructions
+                  installButton.style.display = 'inline-block';
+                  installButton.textContent = '📱 Install App';
+                  installButton.onclick = () => {
+                    const instructions = 
+                      'Cara Install Aplikasi:\n\n' +
+                      'Chrome/Edge Desktop:\n' +
+                      '• Klik menu (⋮) di kanan atas\n' +
+                      '• Pilih "Install Story Map"\n\n' +
+                      'Chrome Android:\n' +
+                      '• Klik menu (⋮) > "Install app"\n\n' +
+                      'Safari iOS:\n' +
+                      '• Klik tombol Share (□↑)\n' +
+                      '• Pilih "Add to Home Screen"\n\n' +
+                      'Firefox:\n' +
+                      '• Klik menu (☰) > "Install"';
+                    alert(instructions);
+                  };
+                  console.log('📱 Manual install button shown');
+                }
+              }
+            }, 3000);
 
             // Listen for app installed
             window.addEventListener('appinstalled', () => {
               console.log('PWA was installed');
+              deferredPrompt = null;
               const installButton = document.getElementById('install-button');
               if (installButton) {
                 installButton.style.display = 'none';
               }
+              
+              // Show notification
+              (async () => {
+                try {
+                  const { default: HeaderNotification } = await import('./scripts/utils/header-notification.js');
+                  HeaderNotification.success(
+                    'Aplikasi Terinstal!',
+                    'Story Map telah berhasil diinstal di perangkat Anda.',
+                    4000
+                  );
+                } catch (err) {
+                  console.error('Error showing install notification:', err);
+                }
+              })();
             });
+            
+            // Check if already installed on page load
+            if (isInstalled) {
+              const installButton = document.getElementById('install-button');
+              if (installButton) {
+                installButton.style.display = 'none';
+              }
+            }
           } catch (error) {
             console.error('ServiceWorker registration failed: ', error);
           }

@@ -116,6 +116,7 @@ body {
 
 header {
   background-color: lightskyblue;
+  position: relative;
 }
 
 .main-header {
@@ -169,6 +170,61 @@ header {
   color: #141e16;
 
   cursor: pointer;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #333;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.header-btn:hover {
+  background-color: #f5f5f5;
+  border-color: #bbb;
+}
+
+.header-btn .btn-icon {
+  font-size: 1.1rem;
+}
+
+.header-btn .btn-text {
+  display: inline-block;
+}
+
+.notification-btn.active {
+  background-color: #4f46e5;
+  color: #fff;
+  border-color: #4f46e5;
+}
+
+.notification-btn.active:hover {
+  background-color: #4338ca;
+}
+
+@media screen and (max-width: 768px) {
+  .header-btn .btn-text {
+    display: none;
+  }
+  
+  .header-btn {
+    padding: 8px;
+    min-width: 40px;
+    justify-content: center;
+  }
 }
 
 .nav-list {
@@ -444,10 +500,65 @@ header {
   gap: 0.5rem;
 }
 
+.story-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
 .story-content h3 {
   margin: 0;
   font-size: 1rem;
   color: #333;
+  flex: 1;
+}
+
+.favorite-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 1.2rem;
+  transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  flex-shrink: 0;
+}
+
+.favorite-btn:hover {
+  transform: scale(1.2);
+}
+
+.favorite-btn:active {
+  transform: scale(0.9);
+}
+
+.favorite-btn .favorite-icon {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.favorite-btn.favorited .favorite-icon {
+  animation: heartBeat 0.5s ease;
+}
+
+@keyframes heartBeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.3);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  75% {
+    transform: scale(1.2);
+  }
 }
 
 .story-description {
@@ -902,6 +1013,210 @@ header {
   }
 }
 
+/* Header Notification Styles */
+.header-notification-container {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.header-notification {
+  background-color: #fff;
+  border-left: 4px solid #4f46e5;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+  padding: 12px 16px;
+  margin: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+  animation: slideDown 0.3s ease-out;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.header-notification.success {
+  border-left-color: #10b981;
+  background-color: #f0fdf4;
+}
+
+.header-notification.error {
+  border-left-color: #ef4444;
+  background-color: #fef2f2;
+}
+
+.header-notification.warning {
+  border-left-color: #f59e0b;
+  background-color: #fffbeb;
+}
+
+.header-notification.info {
+  border-left-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.header-notification-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.notification-icon-svg {
+  width: 100%;
+  height: 100%;
+  min-width: 24px;
+  min-height: 24px;
+}
+
+.header-notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.header-notification-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1f2937;
+  margin-bottom: 2px;
+}
+
+.header-notification-message {
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.header-notification-close {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+}
+
+.header-notification-close:hover {
+  color: #374151;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.header-notification-close:focus {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+
+.header-notification-close svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header-notification.hiding {
+  animation: slideUp 0.3s ease-in forwards;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .header-notification {
+    margin: 8px;
+    max-width: 100%;
+  }
+  
+  .header-notification-title {
+    font-size: 0.9rem;
+  }
+  
+  .header-notification-message {
+    font-size: 0.8rem;
+  }
+}
+
+/* Install Button Styles */
+.install-btn {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+}
+
+.install-btn:hover {
+  background-color: #4338ca;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
+}
+
+.install-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+}
+
+.install-btn:focus {
+  outline: 3px solid #4f46e5;
+  outline-offset: 2px;
+}
+
+.btn.btn-secondary {
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn.btn-secondary:hover {
+  background-color: #4b5563;
+}
+
+.btn.btn-secondary:focus {
+  outline: 2px solid #6b7280;
+  outline-offset: 2px;
+}
+
 /* required styles */
 
 .leaflet-pane,
@@ -1260,12 +1575,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	border-radius: 5px;
 	}
 .leaflet-control-layers-toggle {
-	background-image: url(/submitan-pertama-Intermediate/416d91365b44e4b4f477.png);
+	background-image: url(/416d91365b44e4b4f477.png);
 	width: 36px;
 	height: 36px;
 	}
 .leaflet-retina .leaflet-control-layers-toggle {
-	background-image: url(/submitan-pertama-Intermediate/8f2c4d11474275fbc161.png);
+	background-image: url(/8f2c4d11474275fbc161.png);
 	background-size: 26px 26px;
 	}
 .leaflet-touch .leaflet-control-layers-toggle {
@@ -1308,7 +1623,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 /* Default icon URLs */
 .leaflet-default-icon-path { /* used only in path-guessing heuristic, see L.Icon.Default */
-	background-image: url(/submitan-pertama-Intermediate/2b3e1faf89f94a483539.png);
+	background-image: url(/2b3e1faf89f94a483539.png);
 	}
 
 
