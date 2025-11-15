@@ -246,9 +246,11 @@
                     return;
                   }
 
-                  // Ensure button is visible
+                  // Ensure button is visible and enabled
                   if (toggleBtn) {
                     toggleBtn.style.display = '';
+                    toggleBtn.disabled = false;
+                    console.log('✅ Notification button is visible and enabled');
                   }
 
                   const subscription = await NotificationHelper.getSubscription();
@@ -265,14 +267,16 @@
                     } else {
                       toggleBtn.classList.remove('active');
                     }
-                    console.log('Notification button updated');
+                    console.log('✅ Notification button updated');
                   }
                 } catch (error) {
-                  console.error('Error checking notification status:', error);
-                  // Don't hide button on error, just log it
+                  console.error('❌ Error checking notification status:', error);
+                  // Keep button visible even on error
                   const toggleBtn = document.getElementById('notification-toggle');
                   if (toggleBtn) {
-                    console.log('Notification button still visible despite error');
+                    toggleBtn.style.display = '';
+                    toggleBtn.disabled = false;
+                    console.log('✅ Notification button kept visible despite error');
                   }
                 }
               })();
@@ -361,10 +365,10 @@
               }
             });
             
-            // Check if install prompt is available after a delay
+            // Always show install button after page loads (if not installed)
             setTimeout(async () => {
-              if (!deferredPrompt && !isInstalled) {
-                console.log('⚠️ Install prompt not available. Checking requirements...');
+              if (!isInstalled) {
+                console.log('🔍 Checking PWA requirements...');
                 console.log('Service Worker:', 'serviceWorker' in navigator);
                 const manifestHref = document.querySelector('link[rel="manifest"]')?.href;
                 console.log('Manifest:', manifestHref);
@@ -375,12 +379,12 @@
                     const manifestResponse = await fetch(manifestHref);
                     if (manifestResponse.ok) {
                       const manifest = await manifestResponse.json();
-                      console.log('Manifest loaded:', manifest);
+                      console.log('✅ Manifest loaded:', manifest);
                     } else {
-                      console.error('Manifest not accessible:', manifestResponse.status);
+                      console.error('❌ Manifest not accessible:', manifestResponse.status);
                     }
                   } catch (error) {
-                    console.error('Error loading manifest:', error);
+                    console.error('❌ Error loading manifest:', error);
                   }
                 }
                 
@@ -396,34 +400,60 @@
                   console.error('Error checking service worker:', error);
                 }
                 
-                // Try to show install button anyway for manual install
+                // Always show install button (even if beforeinstallprompt didn't fire)
                 const installButton = document.getElementById('install-button');
                 if (installButton) {
-                  // Show button with manual install instructions
                   installButton.style.display = 'inline-block';
                   installButton.textContent = '📱 Install App';
-                  installButton.onclick = () => {
-                    const instructions = 
-                      'Cara Install Aplikasi:\n\n' +
-                      'Chrome/Edge Desktop:\n' +
-                      '• Klik menu (⋮) di kanan atas\n' +
-                      '• Pilih "Install Story Map"\n\n' +
-                      'Chrome Android:\n' +
-                      '• Klik menu (⋮) > "Install app"\n\n' +
-                      'Safari iOS:\n' +
-                      '• Klik tombol Share (□↑)\n' +
-                      '• Pilih "Add to Home Screen"\n\n' +
-                      'Firefox:\n' +
-                      '• Klik menu (☰) > "Install"';
-                    alert(instructions);
-                  };
-                  console.log('📱 Manual install button shown');
+                  
+                  // Set click handler based on whether we have deferredPrompt
+                  if (deferredPrompt && installButtonClickHandler) {
+                    // Use the beforeinstallprompt handler if available
+                    installButton.onclick = installButtonClickHandler;
+                    console.log('✅ Install button with prompt handler');
+                  } else {
+                    // Use manual install instructions
+                    installButton.onclick = () => {
+                      if (deferredPrompt) {
+                        // Try to use prompt if available
+                        deferredPrompt.prompt();
+                        deferredPrompt.userChoice.then((choiceResult) => {
+                          if (choiceResult.outcome === 'accepted') {
+                            console.log('User accepted install');
+                            if (window.HeaderNotification) {
+                              window.HeaderNotification.success(
+                                'Aplikasi Berhasil Diinstal',
+                                'Terima kasih! Aplikasi Story Map sedang diinstal.',
+                                3000
+                              );
+                            }
+                          }
+                          deferredPrompt = null;
+                        });
+                      } else {
+                        // Show manual instructions
+                        const instructions = 
+                          'Cara Install Aplikasi:\n\n' +
+                          'Chrome/Edge Desktop:\n' +
+                          '• Klik menu (⋮) di kanan atas\n' +
+                          '• Pilih "Install Story Map"\n\n' +
+                          'Chrome Android:\n' +
+                          '• Klik menu (⋮) > "Install app"\n\n' +
+                          'Safari iOS:\n' +
+                          '• Klik tombol Share (□↑)\n' +
+                          '• Pilih "Add to Home Screen"\n\n' +
+                          'Firefox:\n' +
+                          '• Klik menu (☰) > "Install"';
+                        alert(instructions);
+                      }
+                    };
+                    console.log('📱 Install button shown with manual instructions');
+                  }
                 }
-              } else if (deferredPrompt) {
-                console.log('✅ Install prompt available, button should be shown');
-                showInstallButton();
+              } else {
+                console.log('✅ App already installed');
               }
-            }, 3000);
+            }, 2000);
 
             // Listen for app installed
             window.addEventListener('appinstalled', () => {
