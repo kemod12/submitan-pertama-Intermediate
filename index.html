@@ -33,12 +33,49 @@
 
       // Helper function to wait for bundle to load
       async function waitForBundle(maxWait = 10000) {
-        const startTime = Date.now();
-        while (!window.NotificationHelper && (Date.now() - startTime) < maxWait) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+        // Check immediately first
+        if (window.NotificationHelper) {
+          console.log('✅ Bundle already loaded');
+          return true;
         }
-        return !!window.NotificationHelper;
+        
+        console.log('⏳ Waiting for bundle to load...');
+        const startTime = Date.now();
+        let checkCount = 0;
+        
+        while (!window.NotificationHelper && (Date.now() - startTime) < maxWait) {
+          checkCount++;
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // Log every second
+          if (checkCount % 10 === 0) {
+            console.log(`⏳ Still waiting... (${Math.floor((Date.now() - startTime) / 1000)}s)`);
+          }
+        }
+        
+        const loaded = !!window.NotificationHelper;
+        if (loaded) {
+          console.log('✅ Bundle loaded successfully');
+        } else {
+          console.error('❌ Bundle failed to load within timeout');
+        }
+        return loaded;
       }
+
+      // Initialize everything after page loads
+      // Use DOMContentLoaded instead of 'load' to start earlier
+      document.addEventListener('DOMContentLoaded', async () => {
+        console.log('📄 DOM Content Loaded');
+        
+        // Wait a bit for bundle script to execute
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Check if bundle is loaded
+        if (!window.NotificationHelper) {
+          console.log('⏳ Bundle not yet loaded, waiting...');
+          await waitForBundle();
+        }
+      });
 
       // Register service worker
       if ('serviceWorker' in navigator) {
@@ -48,9 +85,18 @@
             const registration = await navigator.serviceWorker.register(swPath);
             console.log('ServiceWorker registration successful:', registration.scope);
             
-            // Wait for bundle to load first
-            const bundleLoaded = await waitForBundle();
-            console.log('Bundle loaded:', bundleLoaded, 'NotificationHelper available:', !!window.NotificationHelper);
+            // Ensure bundle is loaded
+            if (!window.NotificationHelper) {
+              console.log('⏳ Waiting for bundle before initializing notifications...');
+              await waitForBundle();
+            }
+            
+            console.log('Bundle status:', {
+              loaded: !!window.NotificationHelper,
+              NotificationHelper: !!window.NotificationHelper,
+              HeaderNotification: !!window.HeaderNotification,
+              CONFIG: !!window.CONFIG
+            });
             
             // Initialize notifications after service worker is ready
             try {
