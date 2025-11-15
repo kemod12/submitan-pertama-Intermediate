@@ -198,46 +198,99 @@
                 const permissionStatus = Notification.permission;
                 console.log('📢 Notification permission status:', permissionStatus);
                 
-                // If permission is default (not asked yet), show prompt
+                // Always check and request notification permission if needed
+                console.log('📢 Current notification permission:', permissionStatus);
+                
                 if (permissionStatus === 'default') {
-                  console.log('📢 Requesting notification permission...');
-                  // Wait a bit before requesting to ensure page is fully loaded
+                  console.log('📢 Requesting notification permission automatically...');
+                  // Show info message first
+                  if (window.HeaderNotification) {
+                    window.HeaderNotification.info(
+                      'Izin Notifikasi',
+                      'Kami akan meminta izin untuk menampilkan notifikasi',
+                      3000
+                    );
+                  }
+                  
+                  // Request permission after a short delay
                   setTimeout(async () => {
                     try {
+                      console.log('📢 Calling requestPermission()...');
                       const hasPermission = await window.NotificationHelper.requestPermission();
+                      console.log('📢 Permission result:', hasPermission);
+                      
                       if (hasPermission) {
                         console.log('✅ Notification permission granted');
                         // Show success notification
                         if (window.HeaderNotification) {
                           window.HeaderNotification.success(
-                            'Notifikasi Diaktifkan',
+                            'Notifikasi Diaktifkan!',
                             'Anda akan menerima notifikasi dari Story Map',
                             4000
                           );
                         }
-                        // Show test notification
-                        await window.NotificationHelper.showLocalNotification(
-                          'Notifikasi Diaktifkan',
-                          {
-                            body: 'Anda akan menerima notifikasi dari Story Map.',
-                            icon: createPath('/images/logo.png'),
-                            badge: createPath('/images/logo.png')
-                          }
-                        );
+                        // Show test notification from browser
+                        try {
+                          await window.NotificationHelper.showLocalNotification(
+                            'Notifikasi Diaktifkan',
+                            {
+                              body: 'Anda akan menerima notifikasi dari Story Map.',
+                              icon: createPath('/images/logo.png'),
+                              badge: createPath('/images/logo.png'),
+                              tag: 'notification-enabled'
+                            }
+                          );
+                          console.log('✅ Test notification shown');
+                        } catch (notifError) {
+                          console.error('Error showing test notification:', notifError);
+                        }
                       } else {
-                        console.log('❌ Notification permission denied');
+                        console.log('❌ Notification permission denied or dismissed');
                         if (window.HeaderNotification) {
-                          window.HeaderNotification.info(
-                            'Izin Notifikasi',
+                          window.HeaderNotification.warning(
+                            'Izin Notifikasi Ditolak',
                             'Klik tombol Notifications di header untuk mengaktifkan notifikasi',
                             5000
                           );
                         }
                       }
                     } catch (error) {
-                      console.error('Error requesting notification permission:', error);
+                      console.error('❌ Error requesting notification permission:', error);
+                      if (window.HeaderNotification) {
+                        window.HeaderNotification.error(
+                          'Error',
+                          'Gagal meminta izin notifikasi: ' + error.message,
+                          5000
+                        );
+                      }
+                    }
+                  }, 3000);
+                } else if (permissionStatus === 'granted') {
+                  console.log('✅ Notification permission already granted');
+                  // Show test notification to confirm it works
+                  setTimeout(async () => {
+                    try {
+                      await window.NotificationHelper.showLocalNotification(
+                        'Notifikasi Aktif',
+                        {
+                          body: 'Notifikasi Story Map sudah aktif!',
+                          icon: createPath('/images/logo.png'),
+                          tag: 'notification-check'
+                        }
+                      );
+                    } catch (error) {
+                      console.error('Error showing check notification:', error);
                     }
                   }, 2000);
+                } else {
+                  console.log('❌ Notification permission was denied');
+                  if (window.HeaderNotification) {
+                    window.HeaderNotification.warning(
+                      'Izin Notifikasi Ditolak',
+                      'Silakan aktifkan notifikasi di pengaturan browser',
+                      5000
+                    );
+                  }
                 }
                 
                 await window.NotificationHelper.initialize();
@@ -437,11 +490,52 @@
               }
             };
             
-            // Log install prompt availability
+            // Log install prompt availability and PWA criteria
             console.log('🔍 Checking for install prompt support...');
-            console.log('Service Worker support:', 'serviceWorker' in navigator);
-            console.log('Manifest link:', document.querySelector('link[rel="manifest"]')?.href);
-            console.log('Is installed:', isInstalled);
+            console.log('   Service Worker support:', 'serviceWorker' in navigator);
+            const manifestLinkEl = document.querySelector('link[rel="manifest"]');
+            console.log('   Manifest link:', manifestLinkEl?.href);
+            console.log('   Is installed:', isInstalled);
+            console.log('   Display mode:', window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser');
+            
+            // Check PWA installability criteria
+            if (manifestLinkEl) {
+              fetch(manifestLinkEl.href)
+                .then(response => {
+                  if (response.ok) {
+                    return response.json();
+                  }
+                  throw new Error(`HTTP ${response.status}`);
+                })
+                .then(manifest => {
+                  console.log('📋 PWA Criteria Check:');
+                  console.log('   ✅ Manifest: Valid');
+                  console.log('   ✅ Icons:', manifest.icons?.length || 0, 'icons');
+                  console.log('   ✅ Start URL:', manifest.start_url);
+                  console.log('   ✅ Scope:', manifest.scope);
+                  console.log('   ✅ Display:', manifest.display);
+                  
+                  // Check if icons are accessible
+                  if (manifest.icons && manifest.icons.length > 0) {
+                    manifest.icons.forEach((icon, index) => {
+                      fetch(icon.src)
+                        .then(response => {
+                          if (response.ok) {
+                            console.log(`   ✅ Icon ${index + 1} (${icon.sizes}): Accessible`);
+                          } else {
+                            console.error(`   ❌ Icon ${index + 1} (${icon.sizes}): Not accessible (${response.status})`);
+                          }
+                        })
+                        .catch(error => {
+                          console.error(`   ❌ Icon ${index + 1} (${icon.sizes}): Error -`, error.message);
+                        });
+                    });
+                  }
+                })
+                .catch(error => {
+                  console.error('❌ Error checking manifest:', error);
+                });
+            }
             
             window.addEventListener('beforeinstallprompt', (e) => {
               console.log('🎉 beforeinstallprompt event fired!');
