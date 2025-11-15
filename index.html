@@ -186,7 +186,8 @@
               loaded: !!window.NotificationHelper,
               NotificationHelper: !!window.NotificationHelper,
               HeaderNotification: !!window.HeaderNotification,
-              CONFIG: !!window.CONFIG
+              CONFIG: !!window.CONFIG,
+              mapService: !!window.mapService
             });
             
             // Initialize notifications after service worker is ready
@@ -420,7 +421,7 @@
                     }
                     return;
                   }
-                  
+
                   const NotificationHelper = window.NotificationHelper;
                   
                   // Check if push is supported
@@ -644,7 +645,7 @@
                     console.log('✅ Install button with prompt handler');
                   } else {
                     // Use manual install instructions
-                    installButton.onclick = () => {
+                  installButton.onclick = () => {
                       if (deferredPrompt) {
                         // Try to use prompt if available
                         deferredPrompt.prompt();
@@ -663,21 +664,21 @@
                         });
                       } else {
                         // Show manual instructions
-                        const instructions = 
-                          'Cara Install Aplikasi:\n\n' +
-                          'Chrome/Edge Desktop:\n' +
-                          '• Klik menu (⋮) di kanan atas\n' +
-                          '• Pilih "Install Story Map"\n\n' +
-                          'Chrome Android:\n' +
-                          '• Klik menu (⋮) > "Install app"\n\n' +
-                          'Safari iOS:\n' +
-                          '• Klik tombol Share (□↑)\n' +
-                          '• Pilih "Add to Home Screen"\n\n' +
-                          'Firefox:\n' +
-                          '• Klik menu (☰) > "Install"';
-                        alert(instructions);
+                    const instructions = 
+                      'Cara Install Aplikasi:\n\n' +
+                      'Chrome/Edge Desktop:\n' +
+                      '• Klik menu (⋮) di kanan atas\n' +
+                      '• Pilih "Install Story Map"\n\n' +
+                      'Chrome Android:\n' +
+                      '• Klik menu (⋮) > "Install app"\n\n' +
+                      'Safari iOS:\n' +
+                      '• Klik tombol Share (□↑)\n' +
+                      '• Pilih "Add to Home Screen"\n\n' +
+                      'Firefox:\n' +
+                      '• Klik menu (☰) > "Install"';
+                    alert(instructions);
                       }
-                    };
+                  };
                     console.log('📱 Install button shown with manual instructions');
                   }
                 }
@@ -700,10 +701,10 @@
                 try {
                   if (window.HeaderNotification) {
                     window.HeaderNotification.success(
-                      'Aplikasi Terinstal!',
-                      'Story Map telah berhasil diinstal di perangkat Anda.',
-                      4000
-                    );
+                    'Aplikasi Terinstal!',
+                    'Story Map telah berhasil diinstal di perangkat Anda.',
+                    4000
+                  );
                   }
                 } catch (err) {
                   console.error('Error showing install notification:', err);
