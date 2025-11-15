@@ -35,13 +35,31 @@
             // Initialize notifications after service worker is ready
             try {
               await registration.ready;
-              // Import from bundle - webpack will resolve the path based on publicPath
-              // For production, webpack uses publicPath from webpack.prod.js
-              const notificationModule = isProduction 
-                ? await import(`${BASE_PATH}/scripts/utils/notification.js`)
-                : await import('./scripts/utils/notification.js');
-              const NotificationHelper = notificationModule.default || notificationModule;
-              await NotificationHelper.initialize();
+              // Wait for bundle to load and expose modules
+              await new Promise((resolve) => {
+                if (window.NotificationHelper) {
+                  resolve();
+                } else {
+                  // Wait for bundle to load
+                  const checkInterval = setInterval(() => {
+                    if (window.NotificationHelper) {
+                      clearInterval(checkInterval);
+                      resolve();
+                    }
+                  }, 100);
+                  // Timeout after 5 seconds
+                  setTimeout(() => {
+                    clearInterval(checkInterval);
+                    resolve();
+                  }, 5000);
+                }
+              });
+              
+              if (window.NotificationHelper) {
+                await window.NotificationHelper.initialize();
+              } else {
+                console.warn('NotificationHelper not available');
+              }
             } catch (error) {
               console.error('Error initializing notifications:', error);
             }
@@ -54,11 +72,11 @@
                 if (e.shiftKey || e.ctrlKey) {
                   e.preventDefault();
                   try {
-                    const notificationModule = isProduction 
-                      ? await import(`${BASE_PATH}/scripts/utils/notification.js`)
-                      : await import('./scripts/utils/notification.js');
-                    const NotificationHelper = notificationModule.default || notificationModule;
-                    const result = await NotificationHelper.testNotification();
+                    if (!window.NotificationHelper) {
+                      alert('NotificationHelper belum dimuat. Silakan refresh halaman.');
+                      return;
+                    }
+                    const result = await window.NotificationHelper.testNotification();
                     if (!result) {
                       alert('Notifikasi tidak dapat ditampilkan. Pastikan izin notifikasi sudah diberikan.');
                     }
@@ -70,14 +88,13 @@
                 }
 
                 try {
-                  const notificationModule = isProduction 
-                    ? await import(`${BASE_PATH}/scripts/utils/notification.js`)
-                    : await import('./scripts/utils/notification.js');
-                  const configModule = isProduction 
-                    ? await import(`${BASE_PATH}/scripts/config.js`)
-                    : await import('./scripts/config.js');
-                  const NotificationHelper = notificationModule.default || notificationModule;
-                  const CONFIG = configModule.default || configModule;
+                  if (!window.NotificationHelper || !window.CONFIG) {
+                    alert('Modul belum dimuat. Silakan refresh halaman.');
+                    return;
+                  }
+                  
+                  const NotificationHelper = window.NotificationHelper;
+                  const CONFIG = window.CONFIG;
                   
                   // Check if push is supported
                   if (!(await NotificationHelper.isPushSupported())) {
@@ -154,10 +171,33 @@
               // Update button text based on current subscription
               (async () => {
                 try {
-                  const notificationModule = isProduction 
-                    ? await import(`${BASE_PATH}/scripts/utils/notification.js`)
-                    : await import('./scripts/utils/notification.js');
-                  const NotificationHelper = notificationModule.default || notificationModule;
+                  // Wait for bundle to load
+                  await new Promise((resolve) => {
+                    if (window.NotificationHelper) {
+                      resolve();
+                    } else {
+                      const checkInterval = setInterval(() => {
+                        if (window.NotificationHelper) {
+                          clearInterval(checkInterval);
+                          resolve();
+                        }
+                      }, 100);
+                      setTimeout(() => {
+                        clearInterval(checkInterval);
+                        resolve();
+                      }, 5000);
+                    }
+                  });
+                  
+                  if (!window.NotificationHelper) {
+                    const toggleBtn = document.getElementById('notification-toggle');
+                    if (toggleBtn) {
+                      toggleBtn.style.display = 'none';
+                    }
+                    return;
+                  }
+                  
+                  const NotificationHelper = window.NotificationHelper;
                   
                   // Check if push is supported
                   if (!(await NotificationHelper.isPushSupported())) {
@@ -245,11 +285,8 @@
                         console.log('✅ User accepted installation');
                         // Show success message
                         try {
-                          const headerNotifModule = isProduction 
-                            ? await import(`${BASE_PATH}/scripts/utils/header-notification.js`)
-                            : await import('./scripts/utils/header-notification.js');
-                          const HeaderNotification = headerNotifModule.default || headerNotifModule;
-                          HeaderNotification.success(
+                          if (window.HeaderNotification) {
+                            window.HeaderNotification.success(
                             'Aplikasi Berhasil Diinstal',
                             'Terima kasih! Aplikasi Story Map sedang diinstal.',
                             3000
@@ -324,12 +361,13 @@
               // Show notification
               (async () => {
                 try {
-                  const { default: HeaderNotification } = await import('./scripts/utils/header-notification.js');
-                  HeaderNotification.success(
-                    'Aplikasi Terinstal!',
-                    'Story Map telah berhasil diinstal di perangkat Anda.',
-                    4000
-                  );
+                  if (window.HeaderNotification) {
+                    window.HeaderNotification.success(
+                      'Aplikasi Terinstal!',
+                      'Story Map telah berhasil diinstal di perangkat Anda.',
+                      4000
+                    );
+                  }
                 } catch (err) {
                   console.error('Error showing install notification:', err);
                 }
