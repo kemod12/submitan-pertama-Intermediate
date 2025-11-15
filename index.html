@@ -1,4 +1,67 @@
-<!doctype html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="description" content="A story sharing platform where users can share their stories with locations on a map"><meta name="theme-color" content="#4f46e5"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Story Map"><link rel="manifest" href="/submitan-pertama-Intermediate/manifest.webmanifest" id="manifest-link" crossorigin="use-credentials"><link rel="shortcut icon" href="/submitan-pertama-Intermediate/favicon.png"><link rel="apple-touch-icon" href="/submitan-pertama-Intermediate/images/logo.png" id="apple-touch-icon"><title>Story Map - Share Your Stories</title><script defer="defer" src="/submitan-pertama-Intermediate/app.bundle.js"></script><link href="/submitan-pertama-Intermediate/app.css" rel="stylesheet"></head><body><a href="#main-content" class="skip-link">Skip to main content</a><header><div class="main-header container"><a class="brand-name" href="#/" aria-label="Story Map Home">Story Map</a><nav id="navigation-drawer" class="navigation-drawer" aria-label="Main navigation"><ul id="nav-list" class="nav-list" role="menubar"><li role="none"><a href="#/" role="menuitem">Home</a></li><li role="none"><a href="#/about" role="menuitem">About</a></li><li role="none"><a href="#/add" role="menuitem">Add Story</a></li></ul></nav><div class="header-actions"><button id="notification-toggle" class="header-btn notification-btn" aria-label="Toggle push notifications"><span class="btn-icon">🔔</span> <span class="btn-text notification-status">Notifications</span></button> <button id="drawer-button" class="drawer-button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navigation-drawer"><span class="sr-only">Menu</span> ☰</button></div></div><div id="header-notification-container" class="header-notification-container" role="region" aria-live="polite" aria-atomic="true"></div></header><main id="main-content" class="main-content" tabindex="-1"></main><footer class="footer"><div class="container"><p>&copy; 2025 Story Map. All rights reserved.</p><div class="notification-controls" style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;"><button id="install-button" class="btn btn-secondary install-btn" style="display: none;" aria-label="Install Story Map app">📱 Install App</button></div></div></footer><script>// Detect environment (development vs production)
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="A story sharing platform where users can share their stories with locations on a map">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Story Map">
+    
+    <!-- PWA Manifest - Must be in head and detected early -->
+    <link rel="manifest" href="/submitan-pertama-Intermediate/manifest.webmanifest" id="manifest-link" crossorigin="use-credentials">
+    <link rel="shortcut icon" href="/submitan-pertama-Intermediate/favicon.png">
+    <link rel="apple-touch-icon" href="/submitan-pertama-Intermediate/images/logo.png" id="apple-touch-icon">
+
+    <title>Story Map - Share Your Stories</title>
+  <script defer="defer" src="/submitan-pertama-Intermediate/app.bundle.js"></script><link href="/submitan-pertama-Intermediate/app.css" rel="stylesheet"></head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <header>
+      <div class="main-header container">
+        <a class="brand-name" href="#/" aria-label="Story Map Home">Story Map</a>
+
+        <nav id="navigation-drawer" class="navigation-drawer" aria-label="Main navigation">
+          <ul id="nav-list" class="nav-list" role="menubar">
+            <li role="none"><a href="#/" role="menuitem">Home</a></li>
+            <li role="none"><a href="#/about" role="menuitem">About</a></li>
+            <li role="none"><a href="#/add" role="menuitem">Add Story</a></li>
+          </ul>
+        </nav>
+
+        <div class="header-actions">
+          <button id="notification-toggle" class="header-btn notification-btn" aria-label="Toggle push notifications">
+            <span class="btn-icon">🔔</span>
+            <span class="btn-text notification-status">Notifications</span>
+          </button>
+          <button id="drawer-button" class="drawer-button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navigation-drawer">
+            <span class="sr-only">Menu</span>
+            ☰
+          </button>
+        </div>
+      </div>
+      <!-- Notification Container -->
+      <div id="header-notification-container" class="header-notification-container" role="region" aria-live="polite" aria-atomic="true"></div>
+    </header>
+
+    <main id="main-content" class="main-content" tabindex="-1"></main>
+
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; 2025 Story Map. All rights reserved.</p>
+        <div class="notification-controls" style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+          <button id="install-button" class="btn btn-secondary install-btn" style="display: none;" aria-label="Install Story Map app">
+            📱 Install App
+          </button>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Detect environment (development vs production)
       const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
       const BASE_PATH = isProduction ? '/submitan-pertama-Intermediate' : '';
       
@@ -568,10 +631,11 @@
                         try {
                           if (window.HeaderNotification) {
                             window.HeaderNotification.success(
-                            'Aplikasi Berhasil Diinstal',
-                            'Terima kasih! Aplikasi Story Map sedang diinstal.',
-                            3000
-                          );
+                              'Aplikasi Berhasil Diinstal',
+                              'Terima kasih! Aplikasi Story Map sedang diinstal.',
+                              3000
+                            );
+                          }
                         } catch (err) {
                           alert('Terima kasih! Aplikasi Story Map sedang diinstal.');
                         }
@@ -645,7 +709,7 @@
                     console.log('✅ Install button with prompt handler');
                   } else {
                     // Use manual install instructions
-                  installButton.onclick = () => {
+                    installButton.onclick = () => {
                       if (deferredPrompt) {
                         // Try to use prompt if available
                         deferredPrompt.prompt();
@@ -664,21 +728,21 @@
                         });
                       } else {
                         // Show manual instructions
-                    const instructions = 
-                      'Cara Install Aplikasi:\n\n' +
-                      'Chrome/Edge Desktop:\n' +
-                      '• Klik menu (⋮) di kanan atas\n' +
-                      '• Pilih "Install Story Map"\n\n' +
-                      'Chrome Android:\n' +
-                      '• Klik menu (⋮) > "Install app"\n\n' +
-                      'Safari iOS:\n' +
-                      '• Klik tombol Share (□↑)\n' +
-                      '• Pilih "Add to Home Screen"\n\n' +
-                      'Firefox:\n' +
-                      '• Klik menu (☰) > "Install"';
-                    alert(instructions);
+                        const instructions = 
+                          'Cara Install Aplikasi:\n\n' +
+                          'Chrome/Edge Desktop:\n' +
+                          '• Klik menu (⋮) di kanan atas\n' +
+                          '• Pilih "Install Story Map"\n\n' +
+                          'Chrome Android:\n' +
+                          '• Klik menu (⋮) > "Install app"\n\n' +
+                          'Safari iOS:\n' +
+                          '• Klik tombol Share (□↑)\n' +
+                          '• Pilih "Add to Home Screen"\n\n' +
+                          'Firefox:\n' +
+                          '• Klik menu (☰) > "Install"';
+                        alert(instructions);
                       }
-                  };
+                    };
                     console.log('📱 Install button shown with manual instructions');
                   }
                 }
@@ -741,4 +805,7 @@
 
       window.addEventListener('online', updateOnlineStatus);
       window.addEventListener('offline', updateOnlineStatus);
-      document.addEventListener('DOMContentLoaded', updateOnlineStatus);</script></body></html>
+      document.addEventListener('DOMContentLoaded', updateOnlineStatus);
+    </script>
+  </body>
+</html>
