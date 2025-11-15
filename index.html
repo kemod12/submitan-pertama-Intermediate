@@ -35,7 +35,12 @@
             // Initialize notifications after service worker is ready
             try {
               await registration.ready;
-              const { default: NotificationHelper } = await import('./scripts/utils/notification.js');
+              // Import from bundle - webpack will resolve the path based on publicPath
+              // For production, webpack uses publicPath from webpack.prod.js
+              const notificationModule = isProduction 
+                ? await import(`${BASE_PATH}/scripts/utils/notification.js`)
+                : await import('./scripts/utils/notification.js');
+              const NotificationHelper = notificationModule.default || notificationModule;
               await NotificationHelper.initialize();
             } catch (error) {
               console.error('Error initializing notifications:', error);
@@ -49,7 +54,10 @@
                 if (e.shiftKey || e.ctrlKey) {
                   e.preventDefault();
                   try {
-                    const { default: NotificationHelper } = await import('./scripts/utils/notification.js');
+                    const notificationModule = isProduction 
+                      ? await import(`${BASE_PATH}/scripts/utils/notification.js`)
+                      : await import('./scripts/utils/notification.js');
+                    const NotificationHelper = notificationModule.default || notificationModule;
                     const result = await NotificationHelper.testNotification();
                     if (!result) {
                       alert('Notifikasi tidak dapat ditampilkan. Pastikan izin notifikasi sudah diberikan.');
@@ -62,8 +70,14 @@
                 }
 
                 try {
-                  const { default: NotificationHelper } = await import('./scripts/utils/notification.js');
-                  const { default: CONFIG } = await import('./scripts/config.js');
+                  const notificationModule = isProduction 
+                    ? await import(`${BASE_PATH}/scripts/utils/notification.js`)
+                    : await import('./scripts/utils/notification.js');
+                  const configModule = isProduction 
+                    ? await import(`${BASE_PATH}/scripts/config.js`)
+                    : await import('./scripts/config.js');
+                  const NotificationHelper = notificationModule.default || notificationModule;
+                  const CONFIG = configModule.default || configModule;
                   
                   // Check if push is supported
                   if (!(await NotificationHelper.isPushSupported())) {
@@ -140,7 +154,10 @@
               // Update button text based on current subscription
               (async () => {
                 try {
-                  const { default: NotificationHelper } = await import('./scripts/utils/notification.js');
+                  const notificationModule = isProduction 
+                    ? await import(`${BASE_PATH}/scripts/utils/notification.js`)
+                    : await import('./scripts/utils/notification.js');
+                  const NotificationHelper = notificationModule.default || notificationModule;
                   
                   // Check if push is supported
                   if (!(await NotificationHelper.isPushSupported())) {
@@ -228,7 +245,10 @@
                         console.log('✅ User accepted installation');
                         // Show success message
                         try {
-                          const { default: HeaderNotification } = await import('./scripts/utils/header-notification.js');
+                          const headerNotifModule = isProduction 
+                            ? await import(`${BASE_PATH}/scripts/utils/header-notification.js`)
+                            : await import('./scripts/utils/header-notification.js');
+                          const HeaderNotification = headerNotifModule.default || headerNotifModule;
                           HeaderNotification.success(
                             'Aplikasi Berhasil Diinstal',
                             'Terima kasih! Aplikasi Story Map sedang diinstal.',
