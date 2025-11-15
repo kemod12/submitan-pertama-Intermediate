@@ -53,7 +53,7 @@
       <div class="container">
         <p>&copy; 2025 Story Map. All rights reserved.</p>
         <div class="notification-controls" style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-          <button id="install-button" class="btn btn-secondary install-btn" style="display: none;" aria-label="Install Story Map app">
+          <button id="install-button" class="btn btn-secondary install-btn" style="display: inline-block;" aria-label="Install Story Map app">
             📱 Install App
           </button>
         </div>
@@ -631,10 +631,10 @@
                         try {
                           if (window.HeaderNotification) {
                             window.HeaderNotification.success(
-                              'Aplikasi Berhasil Diinstal',
-                              'Terima kasih! Aplikasi Story Map sedang diinstal.',
-                              3000
-                            );
+                            'Aplikasi Berhasil Diinstal',
+                            'Terima kasih! Aplikasi Story Map sedang diinstal.',
+                            3000
+                          );
                           }
                         } catch (err) {
                           alert('Terima kasih! Aplikasi Story Map sedang diinstal.');
@@ -709,7 +709,7 @@
                     console.log('✅ Install button with prompt handler');
                   } else {
                     // Use manual install instructions
-                    installButton.onclick = () => {
+                  installButton.onclick = () => {
                       if (deferredPrompt) {
                         // Try to use prompt if available
                         deferredPrompt.prompt();
@@ -728,21 +728,21 @@
                         });
                       } else {
                         // Show manual instructions
-                        const instructions = 
-                          'Cara Install Aplikasi:\n\n' +
-                          'Chrome/Edge Desktop:\n' +
-                          '• Klik menu (⋮) di kanan atas\n' +
-                          '• Pilih "Install Story Map"\n\n' +
-                          'Chrome Android:\n' +
-                          '• Klik menu (⋮) > "Install app"\n\n' +
-                          'Safari iOS:\n' +
-                          '• Klik tombol Share (□↑)\n' +
-                          '• Pilih "Add to Home Screen"\n\n' +
-                          'Firefox:\n' +
-                          '• Klik menu (☰) > "Install"';
-                        alert(instructions);
+                    const instructions = 
+                      'Cara Install Aplikasi:\n\n' +
+                      'Chrome/Edge Desktop:\n' +
+                      '• Klik menu (⋮) di kanan atas\n' +
+                      '• Pilih "Install Story Map"\n\n' +
+                      'Chrome Android:\n' +
+                      '• Klik menu (⋮) > "Install app"\n\n' +
+                      'Safari iOS:\n' +
+                      '• Klik tombol Share (□↑)\n' +
+                      '• Pilih "Add to Home Screen"\n\n' +
+                      'Firefox:\n' +
+                      '• Klik menu (☰) > "Install"';
+                    alert(instructions);
                       }
-                    };
+                  };
                     console.log('📱 Install button shown with manual instructions');
                   }
                 }
@@ -781,6 +781,14 @@
               const installButton = document.getElementById('install-button');
               if (installButton) {
                 installButton.style.display = 'none';
+                console.log('✅ App already installed - hiding install button');
+              }
+            } else {
+              // Ensure install button is visible if not installed
+              const installButton = document.getElementById('install-button');
+              if (installButton) {
+                installButton.style.display = 'inline-block';
+                console.log('✅ Install button visible (app not installed)');
               }
             }
           } catch (error) {
