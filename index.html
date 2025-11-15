@@ -11,7 +11,9 @@
       // Update manifest and icon paths dynamically
       const manifestLink = document.getElementById('manifest-link');
       if (manifestLink) {
-        manifestLink.href = createPath('/manifest.webmanifest');
+        const manifestPath = createPath('/manifest.webmanifest');
+        manifestLink.href = manifestPath;
+        console.log('Manifest path updated to:', manifestPath);
       }
       
       const appleIcon = document.getElementById('apple-touch-icon');
@@ -23,6 +25,20 @@
       if (manifestLink) {
         manifestLink.setAttribute('crossorigin', 'use-credentials');
       }
+      
+      // Log environment info
+      console.log('Environment:', isProduction ? 'Production' : 'Development');
+      console.log('BASE_PATH:', BASE_PATH);
+      console.log('Current URL:', window.location.href);
+
+      // Helper function to wait for bundle to load
+      async function waitForBundle(maxWait = 10000) {
+        const startTime = Date.now();
+        while (!window.NotificationHelper && (Date.now() - startTime) < maxWait) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        return !!window.NotificationHelper;
+      }
 
       // Register service worker
       if ('serviceWorker' in navigator) {
@@ -32,33 +48,19 @@
             const registration = await navigator.serviceWorker.register(swPath);
             console.log('ServiceWorker registration successful:', registration.scope);
             
+            // Wait for bundle to load first
+            const bundleLoaded = await waitForBundle();
+            console.log('Bundle loaded:', bundleLoaded, 'NotificationHelper available:', !!window.NotificationHelper);
+            
             // Initialize notifications after service worker is ready
             try {
               await registration.ready;
-              // Wait for bundle to load and expose modules
-              await new Promise((resolve) => {
-                if (window.NotificationHelper) {
-                  resolve();
-                } else {
-                  // Wait for bundle to load
-                  const checkInterval = setInterval(() => {
-                    if (window.NotificationHelper) {
-                      clearInterval(checkInterval);
-                      resolve();
-                    }
-                  }, 100);
-                  // Timeout after 5 seconds
-                  setTimeout(() => {
-                    clearInterval(checkInterval);
-                    resolve();
-                  }, 5000);
-                }
-              });
               
               if (window.NotificationHelper) {
                 await window.NotificationHelper.initialize();
+                console.log('Notifications initialized');
               } else {
-                console.warn('NotificationHelper not available');
+                console.warn('NotificationHelper not available after waiting');
               }
             } catch (error) {
               console.error('Error initializing notifications:', error);
@@ -172,24 +174,10 @@
               (async () => {
                 try {
                   // Wait for bundle to load
-                  await new Promise((resolve) => {
-                    if (window.NotificationHelper) {
-                      resolve();
-                    } else {
-                      const checkInterval = setInterval(() => {
-                        if (window.NotificationHelper) {
-                          clearInterval(checkInterval);
-                          resolve();
-                        }
-                      }, 100);
-                      setTimeout(() => {
-                        clearInterval(checkInterval);
-                        resolve();
-                      }, 5000);
-                    }
-                  });
+                  const bundleLoaded = await waitForBundle();
                   
-                  if (!window.NotificationHelper) {
+                  if (!bundleLoaded || !window.NotificationHelper) {
+                    console.warn('NotificationHelper not available');
                     const toggleBtn = document.getElementById('notification-toggle');
                     if (toggleBtn) {
                       toggleBtn.style.display = 'none';
@@ -200,16 +188,26 @@
                   const NotificationHelper = window.NotificationHelper;
                   
                   // Check if push is supported
-                  if (!(await NotificationHelper.isPushSupported())) {
-                    const toggleBtn = document.getElementById('notification-toggle');
+                  const isPushSupported = await NotificationHelper.isPushSupported();
+                  console.log('Push notifications supported:', isPushSupported);
+                  
+                  const toggleBtn = document.getElementById('notification-toggle');
+                  if (!isPushSupported) {
                     if (toggleBtn) {
+                      console.log('Hiding notification button - push not supported');
                       toggleBtn.style.display = 'none';
                     }
                     return;
                   }
 
+                  // Ensure button is visible
+                  if (toggleBtn) {
+                    toggleBtn.style.display = '';
+                  }
+
                   const subscription = await NotificationHelper.getSubscription();
-                  const toggleBtn = document.getElementById('notification-toggle');
+                  console.log('Current subscription:', !!subscription);
+                  
                   if (toggleBtn) {
                     const statusSpan = toggleBtn.querySelector('.notification-status');
                     if (statusSpan) {
@@ -221,13 +219,14 @@
                     } else {
                       toggleBtn.classList.remove('active');
                     }
+                    console.log('Notification button updated');
                   }
                 } catch (error) {
                   console.error('Error checking notification status:', error);
-                  // Hide button on error
+                  // Don't hide button on error, just log it
                   const toggleBtn = document.getElementById('notification-toggle');
                   if (toggleBtn) {
-                    toggleBtn.style.display = 'none';
+                    console.log('Notification button still visible despite error');
                   }
                 }
               })();
@@ -317,11 +316,39 @@
             });
             
             // Check if install prompt is available after a delay
-            setTimeout(() => {
+            setTimeout(async () => {
               if (!deferredPrompt && !isInstalled) {
                 console.log('⚠️ Install prompt not available. Checking requirements...');
                 console.log('Service Worker:', 'serviceWorker' in navigator);
-                console.log('Manifest:', document.querySelector('link[rel="manifest"]')?.href);
+                const manifestHref = document.querySelector('link[rel="manifest"]')?.href;
+                console.log('Manifest:', manifestHref);
+                
+                // Check if manifest is accessible
+                if (manifestHref) {
+                  try {
+                    const manifestResponse = await fetch(manifestHref);
+                    if (manifestResponse.ok) {
+                      const manifest = await manifestResponse.json();
+                      console.log('Manifest loaded:', manifest);
+                    } else {
+                      console.error('Manifest not accessible:', manifestResponse.status);
+                    }
+                  } catch (error) {
+                    console.error('Error loading manifest:', error);
+                  }
+                }
+                
+                // Check service worker registration
+                try {
+                  const registration = await navigator.serviceWorker.getRegistration();
+                  console.log('Service Worker registered:', !!registration);
+                  if (registration) {
+                    console.log('Service Worker scope:', registration.scope);
+                    console.log('Service Worker active:', !!registration.active);
+                  }
+                } catch (error) {
+                  console.error('Error checking service worker:', error);
+                }
                 
                 // Try to show install button anyway for manual install
                 const installButton = document.getElementById('install-button');
@@ -346,6 +373,9 @@
                   };
                   console.log('📱 Manual install button shown');
                 }
+              } else if (deferredPrompt) {
+                console.log('✅ Install prompt available, button should be shown');
+                showInstallButton();
               }
             }, 3000);
 
