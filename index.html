@@ -126,7 +126,7 @@
         console.log('📋 Manifest link:', manifestLink.href);
         console.log('📋 Manifest link element:', manifestLink);
         
-        // Test if manifest is accessible
+        // Test if manifest is accessible and update icon paths for GitHub Pages
         fetch(manifestLink.href)
           .then(response => {
             if (response.ok) {
@@ -138,6 +138,45 @@
           })
           .then(manifest => {
             if (manifest) {
+              // Update icon paths for GitHub Pages
+              if (isGitHubPages && manifest.icons) {
+                manifest.icons.forEach(icon => {
+                  if (icon.src && !icon.src.startsWith(BASE_PATH)) {
+                    icon.src = createPath(icon.src);
+                  }
+                });
+                
+                // Update shortcuts icons too
+                if (manifest.shortcuts) {
+                  manifest.shortcuts.forEach(shortcut => {
+                    if (shortcut.icons) {
+                      shortcut.icons.forEach(icon => {
+                        if (icon.src && !icon.src.startsWith(BASE_PATH)) {
+                          icon.src = createPath(icon.src);
+                        }
+                      });
+                    }
+                  });
+                }
+                
+                // Update start_url and scope for GitHub Pages
+                if (isGitHubPages) {
+                  if (manifest.start_url && !manifest.start_url.startsWith(BASE_PATH)) {
+                    manifest.start_url = createPath(manifest.start_url);
+                  }
+                  if (manifest.scope && !manifest.scope.startsWith(BASE_PATH)) {
+                    manifest.scope = createPath(manifest.scope);
+                  }
+                }
+                
+                // Create a new manifest blob and update the link
+                const manifestBlob = new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' });
+                const manifestUrl = URL.createObjectURL(manifestBlob);
+                manifestLink.href = manifestUrl;
+                
+                console.log('✅ Manifest paths updated for GitHub Pages');
+              }
+              
               console.log('✅ Manifest loaded successfully:');
               console.log('   Name:', manifest.name);
               console.log('   Short Name:', manifest.short_name);
@@ -149,6 +188,18 @@
               if (manifest.icons && manifest.icons.length > 0) {
                 manifest.icons.forEach((icon, index) => {
                   console.log(`   Icon ${index + 1}:`, icon.src, icon.sizes);
+                  // Test icon accessibility
+                  fetch(icon.src.startsWith('blob:') ? icon.src : createPath(icon.src))
+                    .then(iconResponse => {
+                      if (iconResponse.ok) {
+                        console.log(`   ✅ Icon ${index + 1} (${icon.sizes}): Accessible`);
+                      } else {
+                        console.error(`   ❌ Icon ${index + 1} (${icon.sizes}): Not accessible (${iconResponse.status})`);
+                      }
+                    })
+                    .catch(iconError => {
+                      console.error(`   ❌ Icon ${index + 1} (${icon.sizes}): Error -`, iconError);
+                    });
                 });
               }
             }
