@@ -139,13 +139,6 @@ header {
   gap: 10px;
 }
 
-.brand-logo {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-  display: block;
-}
-
 .brand-text {
   display: inline-block;
 }

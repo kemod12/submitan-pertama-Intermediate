@@ -24,7 +24,6 @@
     <header>
       <div class="main-header container">
         <a class="brand-name" href="#/" aria-label="Story Map Home">
-          <img src="/images/logo.png" alt="Story Map Logo" class="brand-logo" id="brand-logo-img">
           <span class="brand-text">Story Map</span>
         </a>
 
@@ -120,14 +119,7 @@
       }
       
       // Update brand logo path
-      const brandLogo = document.getElementById('brand-logo-img');
-      if (brandLogo) {
-        const logoPath = createPath('/images/logo.png');
-        const fullLogoPath = window.location.origin + logoPath;
-        if (brandLogo.src !== fullLogoPath && !brandLogo.src.includes(logoPath)) {
-          brandLogo.src = logoPath;
-        }
-      }
+      // Logo image removed - no longer needed
       
       // Log manifest info for debugging and ensure it's detected by browser
       if (manifestLink) {
