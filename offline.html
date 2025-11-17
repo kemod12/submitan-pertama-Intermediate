@@ -73,16 +73,29 @@
     <h1>You're Offline</h1>
     <p>It seems you're not connected to the internet. Don't worry, you can still view previously loaded content and add new stories that will sync when you're back online.</p>
     <div class="button-group">
-      <a href="/submitan-pertama-Intermediate/" class="btn">Go to Home</a>
+      <a href="/" class="btn" id="home-link">Go to Home</a>
       <button onclick="window.location.reload()" class="btn btn-secondary">Try Again</button>
     </div>
   </div>
 
   <script>
+    // Detect environment and set correct base path
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isNetlify = window.location.hostname.includes('netlify');
+    const isGitHubPages = window.location.hostname.includes('github.io') && !isNetlify;
+    const BASE_PATH = isGitHubPages ? '/submitan-pertama-Intermediate' : '';
+    const homeUrl = BASE_PATH ? `${BASE_PATH}/` : '/';
+    
+    // Update home link
+    const homeLink = document.getElementById('home-link');
+    if (homeLink) {
+      homeLink.href = homeUrl;
+    }
+    
     // Check for network status
     function updateOnlineStatus() {
       if (navigator.onLine) {
-        window.location.href = '/submitan-pertama-Intermediate/';
+        window.location.href = homeUrl;
       }
     }
 

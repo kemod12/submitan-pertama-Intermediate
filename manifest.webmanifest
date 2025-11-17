@@ -2,21 +2,21 @@
   "name": "Story Map",
   "short_name": "StoryMap",
   "description": "A story sharing platform with location mapping",
-  "start_url": "/submitan-pertama-Intermediate/",
-  "scope": "/submitan-pertama-Intermediate/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4f46e5",
   "orientation": "any",
   "icons": [
     {
-      "src": "/submitan-pertama-Intermediate/images/logo.png",
+      "src": "/images/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/submitan-pertama-Intermediate/images/logo.png",
+      "src": "/images/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -27,14 +27,14 @@
       "name": "Add New Story",
       "short_name": "New Story",
       "description": "Add a new story with location",
-      "url": "/submitan-pertama-Intermediate/#/add",
-      "icons": [{ "src": "/submitan-pertama-Intermediate/images/logo.png", "sizes": "192x192" }]
+      "url": "/#/add",
+      "icons": [{ "src": "/images/logo.png", "sizes": "192x192" }]
     },
     {
       "name": "View Stories",
       "short_name": "Stories",
       "description": "View all stories",
-      "url": "/submitan-pertama-Intermediate/#/"
+      "url": "/#/"
     }
   ]
 }

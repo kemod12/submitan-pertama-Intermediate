@@ -11,9 +11,10 @@
     <meta name="apple-mobile-web-app-title" content="Story Map">
     
     <!-- PWA Manifest - Must be in head and detected early -->
-    <link rel="manifest" href="/submitan-pertama-Intermediate/manifest.webmanifest" id="manifest-link" crossorigin="use-credentials">
-    <link rel="shortcut icon" href="/submitan-pertama-Intermediate/favicon.png">
-    <link rel="apple-touch-icon" href="/submitan-pertama-Intermediate/images/logo.png" id="apple-touch-icon">
+    <!-- Path will be corrected by inline script below -->
+    <link rel="manifest" href="/manifest.webmanifest" id="manifest-link" crossorigin="use-credentials">
+    <link rel="shortcut icon" href="/favicon.png" id="favicon-link">
+    <link rel="apple-touch-icon" href="/images/logo.png" id="apple-touch-icon">
 
     <title>Story Map - Share Your Stories</title>
   <script defer="defer" src="/submitan-pertama-Intermediate/app.bundle.js"></script><link href="/submitan-pertama-Intermediate/app.css" rel="stylesheet"></head>
@@ -22,13 +23,17 @@
     
     <header>
       <div class="main-header container">
-        <a class="brand-name" href="#/" aria-label="Story Map Home">Story Map</a>
+        <a class="brand-name" href="#/" aria-label="Story Map Home">
+          <img src="/images/logo.png" alt="Story Map Logo" class="brand-logo" id="brand-logo-img">
+          <span class="brand-text">Story Map</span>
+        </a>
 
         <nav id="navigation-drawer" class="navigation-drawer" aria-label="Main navigation">
           <ul id="nav-list" class="nav-list" role="menubar">
             <li role="none"><a href="#/" role="menuitem">Home</a></li>
             <li role="none"><a href="#/about" role="menuitem">About</a></li>
             <li role="none"><a href="#/add" role="menuitem">Add Story</a></li>
+            <li role="none"><a href="#/favorite" role="menuitem">Favorite</a></li>
           </ul>
         </nav>
 
@@ -62,8 +67,14 @@
 
     <script>
       // Detect environment (development vs production)
-      const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
-      const BASE_PATH = isProduction ? '/submitan-pertama-Intermediate' : '';
+      // Untuk local development (localhost, 127.0.0.1 dengan port), gunakan root path
+      // Untuk Netlify, gunakan root path
+      // Untuk production GitHub Pages, gunakan subdirectory
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const isNetlify = window.location.hostname.includes('netlify');
+      const isGitHubPages = window.location.hostname.includes('github.io') && !isNetlify;
+      // Untuk localhost dan Netlify, gunakan root path. Untuk GitHub Pages, gunakan subdirectory
+      const BASE_PATH = isGitHubPages ? '/submitan-pertama-Intermediate' : '';
       
       // Helper function to create path
       const createPath = (path) => {
@@ -71,23 +82,50 @@
         return fullPath.replace(/\/+/g, '/'); // Replace multiple slashes with single slash
       };
       
-      // Verify manifest link is correct (don't change it, just verify)
+      // Verify and correct manifest link
       const manifestLink = document.getElementById('manifest-link');
       if (manifestLink) {
-        const expectedPath = isProduction ? '/submitan-pertama-Intermediate/manifest.webmanifest' : '/manifest.webmanifest';
+        const expectedPath = isGitHubPages ? '/submitan-pertama-Intermediate/manifest.webmanifest' : '/manifest.webmanifest';
         const fullExpectedPath = window.location.origin + expectedPath;
-        if (!manifestLink.href.includes(expectedPath)) {
-          console.warn('⚠️ Manifest path might be incorrect. Expected to contain:', expectedPath);
-        } else {
+        
+        // Update manifest link if needed
+        if (manifestLink.href !== fullExpectedPath && !manifestLink.href.includes(expectedPath)) {
+          console.log('🔧 Correcting manifest path from', manifestLink.href, 'to', expectedPath);
+          manifestLink.href = expectedPath;
+        }
+        
+        if (manifestLink.href.includes(expectedPath) || manifestLink.href === fullExpectedPath) {
           console.log('✅ Manifest path is correct:', manifestLink.href);
+        } else {
+          console.warn('⚠️ Manifest path might be incorrect. Expected to contain:', expectedPath, 'but got:', manifestLink.href);
         }
       }
       
+      // Update favicon path
+      const faviconLink = document.getElementById('favicon-link');
+      if (faviconLink) {
+        const faviconPath = createPath('/favicon.png');
+        if (faviconLink.href !== window.location.origin + faviconPath) {
+          faviconLink.href = faviconPath;
+        }
+      }
+      
+      // Update apple touch icon path
       const appleIcon = document.getElementById('apple-touch-icon');
-      if (appleIcon && isProduction) {
+      if (appleIcon) {
         const iconPath = createPath('/images/logo.png');
-        if (!appleIcon.href.includes(iconPath)) {
+        if (appleIcon.href !== window.location.origin + iconPath) {
           appleIcon.href = iconPath;
+        }
+      }
+      
+      // Update brand logo path
+      const brandLogo = document.getElementById('brand-logo-img');
+      if (brandLogo) {
+        const logoPath = createPath('/images/logo.png');
+        const fullLogoPath = window.location.origin + logoPath;
+        if (brandLogo.src !== fullLogoPath && !brandLogo.src.includes(logoPath)) {
+          brandLogo.src = logoPath;
         }
       }
       
@@ -152,8 +190,8 @@
       }
       
       // Log environment info
-      console.log('Environment:', isProduction ? 'Production' : 'Development');
-      console.log('BASE_PATH:', BASE_PATH);
+      console.log('Environment:', isLocalhost ? 'Development (Local)' : isNetlify ? 'Production (Netlify)' : isGitHubPages ? 'Production (GitHub Pages)' : 'Production');
+      console.log('BASE_PATH:', BASE_PATH || '(root path)');
       console.log('Current URL:', window.location.href);
 
       // Helper function to wait for bundle to load
@@ -207,7 +245,7 @@
         window.addEventListener('load', async () => {
           try {
             const swPath = createPath('/sw.js');
-            const swScope = isProduction ? '/submitan-pertama-Intermediate/' : '/';
+            const swScope = isGitHubPages ? '/submitan-pertama-Intermediate/' : '/';
             
             console.log('🔧 Registering service worker...');
             console.log('   Path:', swPath);
@@ -369,7 +407,15 @@
             // Initialize notification toggle
             const notificationToggle = document.getElementById('notification-toggle');
             if (notificationToggle) {
+              let isProcessing = false; // Prevent double-click
+              
               notificationToggle.addEventListener('click', async (e) => {
+                // Prevent double-click
+                if (isProcessing) {
+                  console.log('Notification toggle is already processing, ignoring click');
+                  return;
+                }
+
                 // Check if it's a long press or right click for test notification
                 if (e.shiftKey || e.ctrlKey) {
                   e.preventDefault();
@@ -389,10 +435,15 @@
                   return;
                 }
 
+                isProcessing = true;
+                const originalText = notificationToggle.querySelector('.notification-status')?.textContent || '';
+                
                 try {
+                  // Disable button during processing
+                  notificationToggle.disabled = true;
+                  
                   if (!window.NotificationHelper || !window.CONFIG) {
-                    alert('Modul belum dimuat. Silakan refresh halaman.');
-                    return;
+                    throw new Error('Modul belum dimuat. Silakan refresh halaman.');
                   }
                   
                   const NotificationHelper = window.NotificationHelper;
@@ -400,36 +451,65 @@
                   
                   // Check if push is supported
                   if (!(await NotificationHelper.isPushSupported())) {
-                    alert('Push notifications are not supported in this browser.');
-                    return;
+                    throw new Error('Push notifications are not supported in this browser.');
                   }
 
-                  // Request notification permission first
-                  const hasPermission = await NotificationHelper.requestPermission();
-                  if (!hasPermission) {
-                    alert('Notification permission denied. Please enable it in your browser settings.');
-                    return;
-                  }
-
+                  // Get current subscription status
                   const subscription = await NotificationHelper.getSubscription();
                   
                   if (subscription) {
                     // Unsubscribe
-                    const token = localStorage.getItem('token');
-                    await NotificationHelper.unsubscribeUser(token);
                     const statusSpan = notificationToggle.querySelector('.notification-status');
                     if (statusSpan) {
-                      statusSpan.textContent = 'Enable Notifications';
+                      statusSpan.textContent = 'Disabling...';
                     }
-                    notificationToggle.classList.remove('active');
-                    console.log('Unsubscribed from push notifications');
+                    
+                    const token = localStorage.getItem('token');
+                    await NotificationHelper.unsubscribeUser(token);
+                    
+                    // Verify unsubscribe was successful
+                    const verifySubscription = await NotificationHelper.getSubscription();
+                    if (!verifySubscription) {
+                      // Update UI only after successful unsubscribe
+                      if (statusSpan) {
+                        statusSpan.textContent = 'Enable Notifications';
+                      }
+                      notificationToggle.classList.remove('active');
+                      
+                      if (window.HeaderNotification) {
+                        window.HeaderNotification.success(
+                          'Notifikasi Dinonaktifkan',
+                          'Notifikasi push telah dinonaktifkan.',
+                          3000
+                        );
+                      }
+                      console.log('✅ Unsubscribed from push notifications');
+                    } else {
+                      throw new Error('Gagal menonaktifkan notifikasi. Silakan coba lagi.');
+                    }
                   } else {
                     // Subscribe
+                    const statusSpan = notificationToggle.querySelector('.notification-status');
+                    if (statusSpan) {
+                      statusSpan.textContent = 'Enabling...';
+                    }
+
+                    // Request notification permission first
+                    const hasPermission = await NotificationHelper.requestPermission();
+                    if (!hasPermission) {
+                      throw new Error('Izin notifikasi ditolak. Silakan aktifkan di pengaturan browser.');
+                    }
+
                     const newSubscription = await NotificationHelper.subscribeUser(CONFIG.VAPID_PUBLIC_KEY);
                     
                     if (!newSubscription) {
-                      alert('Failed to subscribe to push notifications. Please try again.');
-                      return;
+                      throw new Error('Gagal berlangganan push notification. Silakan coba lagi.');
+                    }
+                    
+                    // Verify subscription was successful
+                    const verifySubscription = await NotificationHelper.getSubscription();
+                    if (!verifySubscription) {
+                      throw new Error('Subscription gagal dibuat. Silakan coba lagi.');
                     }
                     
                     // Send subscription to server
@@ -437,36 +517,77 @@
                     if (token) {
                       const success = await NotificationHelper.sendSubscriptionToServer(newSubscription, token);
                       if (success) {
-                        const statusSpan = notificationToggle.querySelector('.notification-status');
+                        // Update UI after successful server sync
                         if (statusSpan) {
                           statusSpan.textContent = 'Disable Notifications';
                         }
                         notificationToggle.classList.add('active');
-                        console.log('Subscribed to push notifications');
+                        
+                        if (window.HeaderNotification) {
+                          window.HeaderNotification.success(
+                            'Notifikasi Diaktifkan',
+                            'Notifikasi push telah diaktifkan dan tersinkron dengan server.',
+                            3000
+                          );
+                        }
+                        console.log('✅ Subscribed to push notifications');
                       } else {
-                        // Still store locally even if server sync fails
-                        localStorage.setItem('pushSubscription', JSON.stringify(newSubscription));
-                        const statusSpan = notificationToggle.querySelector('.notification-status');
+                        // Still update UI even if server sync fails
                         if (statusSpan) {
                           statusSpan.textContent = 'Disable Notifications';
                         }
                         notificationToggle.classList.add('active');
-                        alert('Subscribed locally, but failed to register with server. Will retry when online.');
+                        
+                        // Show user-friendly notification
+                        if (window.HeaderNotification) {
+                          window.HeaderNotification.warning(
+                            'Notifikasi Diaktifkan (Lokal)',
+                            'Notifikasi berhasil diaktifkan di browser, tetapi gagal terhubung ke server. Aplikasi akan mencoba lagi secara otomatis saat online.',
+                            7000
+                          );
+                        }
+                        console.log('⚠️ Subscribed locally, server sync failed');
                       }
                     } else {
                       // Store subscription locally if not logged in
-                      localStorage.setItem('pushSubscription', JSON.stringify(newSubscription));
-                      const statusSpan = notificationToggle.querySelector('.notification-status');
                       if (statusSpan) {
                         statusSpan.textContent = 'Disable Notifications';
                       }
                       notificationToggle.classList.add('active');
-                      console.log('Subscribed to push notifications (will sync when logged in)');
+                      
+                      if (window.HeaderNotification) {
+                        window.HeaderNotification.info(
+                          'Notifikasi Diaktifkan',
+                          'Notifikasi telah diaktifkan. Akan tersinkron saat Anda login.',
+                          5000
+                        );
+                      }
+                      console.log('✅ Subscribed to push notifications (will sync when logged in)');
                     }
                   }
                 } catch (error) {
                   console.error('Error toggling notifications:', error);
-                  alert('Failed to update notification settings: ' + error.message);
+                  
+                  // Restore original text on error
+                  const statusSpan = notificationToggle.querySelector('.notification-status');
+                  if (statusSpan) {
+                    statusSpan.textContent = originalText;
+                  }
+                  
+                  // Show error notification
+                  if (window.HeaderNotification) {
+                    window.HeaderNotification.error(
+                      'Gagal Mengubah Pengaturan',
+                      error.message || 'Terjadi kesalahan saat mengubah pengaturan notifikasi.',
+                      5000
+                    );
+                  } else {
+                    alert('Gagal mengubah pengaturan notifikasi: ' + error.message);
+                  }
+                } finally {
+                  // Re-enable button
+                  isProcessing = false;
+                  notificationToggle.disabled = false;
                 }
               });
 

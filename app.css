@@ -134,6 +134,20 @@ header {
   font-weight: bold;
   text-decoration: none;
   color: #333;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  display: block;
+}
+
+.brand-text {
+  display: inline-block;
 }
 
 .navigation-drawer {
@@ -417,6 +431,8 @@ header {
 #map {
   height: 100%;
   width: 100%;
+  min-height: 400px;
+  background-color: #e5e5e5;
 }
 
 @media screen and (width >= 768px) {
@@ -1215,6 +1231,104 @@ header {
 .btn.btn-secondary:focus {
   outline: 2px solid #6b7280;
   outline-offset: 2px;
+}
+
+/* Favorite Page Styles */
+.favorite-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+
+.favorite-page .page-header {
+  margin-bottom: 2rem;
+}
+
+.favorite-page .page-header h1 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.favorite-page .page-description {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.favorite-page .content-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.favorite-page .story-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.favorite-page .story-controls {
+  margin-bottom: 1rem;
+}
+
+.favorite-page .story-controls h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.favorite-stats {
+  margin-bottom: 1rem;
+}
+
+.favorite-stats .stats-text {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.favorite-stats .stats-text strong {
+  color: #007bff;
+  font-size: 1.1rem;
+}
+
+.favorite-page .story-image-placeholder {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e9ecef;
+  color: #6c757d;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.favorite-page .story-location {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 0.25rem 0;
+}
+
+.favorite-page .story-date {
+  font-size: 0.75rem;
+  color: #999;
+  margin-top: 0.5rem;
+}
+
+/* Responsive Styles for Favorite Page */
+@media screen and (max-width: 768px) {
+  .favorite-page .content-wrapper {
+    grid-template-columns: 1fr;
+  }
+  
+  .favorite-page .page-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .favorite-page .map-container {
+    order: -1;
+    height: 300px;
+  }
 }
 
 /* required styles */
